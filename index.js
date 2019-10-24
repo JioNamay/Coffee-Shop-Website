@@ -1,5 +1,6 @@
 // const welcome = require("./client/src/pages/Welcome");
 // const welcome = require("./client/src/pages/Login");
+// const welcome = require("./client/src/pages/Signup");
 const express = require("express");
 const path = require("path");
 const { Pool } = require("pg");
@@ -39,6 +40,12 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   res.send(
     "<p>this should display the login page in client/public/src/pages. trying to figure out how to do that</p>"
+  );
+});
+
+app.get("/signup", (req, res) => {
+  res.send(
+    "<p>this should display the signup page in client/public/src/pages. trying to figure out how to do that</p>"
   );
 });
 

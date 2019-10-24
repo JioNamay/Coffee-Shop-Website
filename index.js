@@ -31,7 +31,7 @@ app.use("/api/user", require("./routes/user"));
 
 app.get("/", (req, res) => {
   res.send(
-    "<p>this should display the welcome page in client/public/src/pages. trying to figure out how to do that"
+    "<p>this should display the welcome page in client/public/src/pages. trying to figure out how to do that</p>"
   );
 });
 

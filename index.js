@@ -31,23 +31,5 @@ app.use(function(req, res, next) {
 
 app.use("/api/user", require("./routes/user"));
 
-app.get("/", (req, res) => {
-  res.send(
-    "<p>this should display the welcome page in client/public/src/pages. trying to figure out how to do that</p>"
-  );
-});
-
-app.get("/login", (req, res) => {
-  res.send(
-    "<p>this should display the login page in client/public/src/pages. trying to figure out how to do that</p>"
-  );
-});
-
-app.get("/signup", (req, res) => {
-  res.send(
-    "<p>this should display the signup page in client/public/src/pages. trying to figure out how to do that</p>"
-  );
-});
-
 const PORT = process.env.port || 5000;
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));

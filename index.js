@@ -27,6 +27,7 @@ app.use(function(req, res, next) {
 });
 
 app.use("/api/user", require("./routes/user"));
+app.use("/api/products", require("./routes/products"));
 
 const PORT = process.env.port || 5000;
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));

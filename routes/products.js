@@ -36,22 +36,45 @@ router.get("/:id", async (req, res) => {
     const existsQuery = `SELECT EXISTS(SELECT id FROM products WHERE id = '${productId}')`;
     const existsResult = await client.query(existsQuery);
 
-    // if the task does not exist, send an error
-    const taskExists = existsResult.rows[0].exists;
-    if (!taskExists)
-      return res.status(404).send("The task with the given ID was not found.");
+    // if the product does not exist, send an error
+    const productExists = existsResult.rows[0].exists;
+    if (!productExists)
+      return res
+        .status(404)
+        .send("The product with the given ID was not found.");
 
-    // retrieve the task from the database
+    // retrieve the product from the database
     const retrieveQuery = `SELECT * FROM products WHERE id = '${productId}'`;
     const retrieveResult = await client.query(retrieveQuery);
     client.release();
-    res.status(200).json(retrieveResult.rows[0]); // send the task
+    res.status(200).json(retrieveResult.rows[0]); // send the product
   } catch (error) {
     res.status(500).send("Something went wrong.");
   }
 });
 
-router.post("/", async (req, res) => {});
+router.post("/", async (req, res) => {
+  try {
+    const result = validatePostPRoduct(req.body);
+    const { value } = result;
+    const { error } = result;
+    // if there was an error with the validation, send an error
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const client = await pool.connect();
+    const insertQuery = `INSERT INTO products (name, price, stock) VALUES ('${value.name}', '${value.price}', '${value.stock}'); SELECT currval('products_id_seq')`;
+    const insertResult = await client.query(insertQuery);
+
+    // retrieve the newly added product
+    const productId = insertResult[1].rows[0].currval;
+    const retrieveQuery = `SELECT * FROM products WHERE id = '${productId}'`;
+    const retrieveResult = await client.query(retrieveQuery);
+
+    res.status(201).json(retrieveResult.rows[0]); // as a best practice, send the posted product as a response
+  } catch {
+    res.status(500).send("Something went wrong.");
+  }
+});
 
 /**
  * Validates the POST request body using the POST request body schema.

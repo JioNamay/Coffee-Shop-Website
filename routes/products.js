@@ -64,7 +64,7 @@ router.post("/", async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     const client = await pool.connect();
-    const insertQuery = `INSERT INTO products (name, price, stock) VALUES ('${value.name}', '${value.price}', '${value.stock}'); SELECT currval('products_id_seq')`;
+    const insertQuery = `INSERT INTO products (name, price, stock, description) VALUES ('${value.name}', '${value.price}', '${value.stock}', '${value.description}'); SELECT currval('products_id_seq')`;
     const insertResult = await client.query(insertQuery);
 
     // retrieve the newly added product
@@ -111,12 +111,13 @@ router.put("/:id", async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     // update the product in the database
-    const updateQuery = `UPDATE products SET name = ${value.name}, price = ${value.price}, stock = ${value.stock} WHERE id = '${productId}'`;
+    const updateQuery = `UPDATE products SET name = ${value.name}, price = ${value.price}, stock = ${value.stock}, description = ${value.description} WHERE id = '${productId}'`;
     const updateResult = await client.query(updateQuery);
 
     product.name = value.name;
     product.price = value.price;
     product.stock = value.stock;
+    product.description = value.description;
     client.release();
 
     res.status(200).send(product); // as a best practice, send the updated product as a response
@@ -179,7 +180,10 @@ function validatePostProduct(product) {
       .integer() // must be an integer
       .min(0) // must be >= 0
       .empty(null) // if null, make it undefined
-      .default(0) // if stock undefined, set it to 0
+      .default(0), // if stock undefined, set it to 0
+    description: Joi.string()
+      .empty(null) // if null, make it undefined
+      .default("covfefe") // if description undefined, set it to covfefe
   };
 
   return Joi.validate(product, schema);
@@ -203,7 +207,8 @@ function validatePutProduct(oldProduct, newProduct) {
     stock: Joi.number()
       .integer() // must be an integer
       .min(0) // must be >= 0
-      .default(oldProduct.stock) // if undefined, do not change the stock
+      .default(oldProduct.stock), // if undefined, do not change the stock
+    description: Joi.string().default(oldProduct.description) // if undefined, do not change the description
   };
 
   return Joi.validate(newProduct, schema);

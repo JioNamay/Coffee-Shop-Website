@@ -1,17 +1,9 @@
 const express = require("express");
 const { Router } = "express";
-const bodyParser = require("body-parser");
 const Joi = require("@hapi/joi"); // joi validation tool
 const { Pool } = require("pg");
 
 const router = express.Router();
-
-app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: true
-  })
-);
 
 // Database
 pool = new Pool({

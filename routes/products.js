@@ -54,6 +54,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// POST a product
 router.post("/", async (req, res) => {
   try {
     const result = validatePostProduct(req.body);
@@ -78,6 +79,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+// PUT (update) a specific product
 router.put("/:id", async (req, res) => {
   try {
     const productId = parseInt(req.params.id);

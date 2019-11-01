@@ -100,4 +100,28 @@ function validatePostProduct(product) {
   return Joi.validate(product, schema);
 }
 
+/**
+ * Validates the PUT request body using the PUT request body schema.
+ * @param {object} oldProduct
+ * @param {object} newProduct
+ * @return {ValidationResult<any>} The joi validation result.
+ */
+function validatePutProduct(oldProduct, newProduct) {
+  const schema = {
+    name: Joi.string()
+      .min(1)
+      .default(oldProduct.name),
+    price: Joi.number()
+      .positive()
+      .precision(2)
+      .default(oldProduct.price),
+    stock: Joi.number()
+      .integer()
+      .min(0)
+      .default(oldProduct.stock)
+  };
+
+  return Joi.validate(newProduct, schema);
+}
+
 module.exports = router;

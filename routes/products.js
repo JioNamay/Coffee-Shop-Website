@@ -1,9 +1,17 @@
 const express = require("express");
 const { Router } = "express";
+const bodyParser = require("body-parser");
 const Joi = require("@hapi/joi"); // joi validation tool
 const { Pool } = require("pg");
 
 const router = express.Router();
+
+app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
 
 // Database
 pool = new Pool({
@@ -52,5 +60,29 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {});
+
+/**
+ * Validates the POST request body using the POST request body schema.
+ * @param {object} product
+ * @return {ValidationResult<any>} The joi validation result.
+ */
+function validatePostProduct(product) {
+  const schema = {
+    name: Joi.string()
+      .min(1) // minimum 1 character required
+      .required(), // name is mandatory
+    price: Joi.number()
+      .positive() // must be a positive number
+      .precision(2) // maximum 2 decimal places
+      .required(), // price is mandatory
+    stock: Joi.number()
+      .integer() // must be an integer
+      .min(0) // must be >= 0
+      .empty(null) // if null, make it undefined
+      .default(0) // if stock undefined, set it to 0
+  };
+
+  return Joi.validate(product, schema);
+}
 
 module.exports = router;

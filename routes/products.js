@@ -1,6 +1,6 @@
 const express = require("express");
 const { Router } = "express";
-const { check, validationResult } = require("express-validator");
+const Joi = require("@hapi/joi"); // joi validation tool
 const { Pool } = require("pg");
 
 const router = express.Router();
@@ -50,5 +50,7 @@ router.get("/:id", async (req, res) => {
     res.status(500).send("Something went wrong.");
   }
 });
+
+router.post("/", async (req, res) => {});
 
 module.exports = router;

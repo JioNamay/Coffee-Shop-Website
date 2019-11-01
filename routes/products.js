@@ -32,6 +32,7 @@ router.get("/:id", async (req, res) => {
     if (Number.isNaN(productId))
       return res.status(400).send("The ID must be a number.");
 
+    // check that the product exists
     const client = await pool.connect();
     const existsQuery = `SELECT EXISTS(SELECT id FROM products WHERE id = '${productId}')`;
     const existsResult = await client.query(existsQuery);
@@ -55,7 +56,7 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const result = validatePostPRoduct(req.body);
+    const result = validatePostProduct(req.body);
     const { value } = result;
     const { error } = result;
     // if there was an error with the validation, send an error
@@ -69,9 +70,54 @@ router.post("/", async (req, res) => {
     const productId = insertResult[1].rows[0].currval;
     const retrieveQuery = `SELECT * FROM products WHERE id = '${productId}'`;
     const retrieveResult = await client.query(retrieveQuery);
+    client.release();
 
     res.status(201).json(retrieveResult.rows[0]); // as a best practice, send the posted product as a response
-  } catch {
+  } catch (error) {
+    res.status(500).send("Something went wrong.");
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId))
+      return res.status(400).send("The ID must be a number.");
+
+    // check that the product exists
+    const client = await pool.connect();
+    const existsQuery = `SELECT EXISTS(SELECT id FROM products WHERE id = '${productId}')`;
+    const existsResult = await client.query(existsQuery);
+
+    // if the product does not exist, send an error
+    const productExists = existsResult.rows[0].exists;
+    if (!productExists)
+      return res
+        .status(404)
+        .send("The product with the given ID was not found.");
+
+    // product exists; get it so that we can validate against it and send it as a response
+    const retrieveQuery = `SELECT * FROM products WHERE id = '${productId}'`;
+    const retrieveResult = await client.query(retrieveQuery);
+    let product = retrieveResult.rows[0];
+
+    const validationResult = validatePutProduct(product, req.body);
+    const { value } = validationResult;
+    const { error } = validationResult;
+    // if there was an error with the validation, send an error
+    if (error) return res.status(400).send(error.details[0].message);
+
+    // update the product in the database
+    const updateQuery = `UPDATE products SET name = ${value.name}, price = ${value.price}, stock = ${value.stock} WHERE id = '${productId}'`;
+    const updateResult = await client.query(updateQuery);
+
+    product.name = value.name;
+    product.price = value.price;
+    product.stock = value.stock;
+    client.release();
+
+    res.status(200).send(product); // as a best practice, send the updated product as a response
+  } catch (error) {
     res.status(500).send("Something went wrong.");
   }
 });

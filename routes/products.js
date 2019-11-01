@@ -109,16 +109,16 @@ function validatePostProduct(product) {
 function validatePutProduct(oldProduct, newProduct) {
   const schema = {
     name: Joi.string()
-      .min(1)
-      .default(oldProduct.name),
+      .min(1) // minimum 1 character required
+      .default(oldProduct.name), // if undefined, do not change the name
     price: Joi.number()
-      .positive()
-      .precision(2)
-      .default(oldProduct.price),
+      .positive() // must be a positive number
+      .precision(2) // maximum 2 decimal places
+      .default(oldProduct.price), // if undefined, do not change the price
     stock: Joi.number()
-      .integer()
-      .min(0)
-      .default(oldProduct.stock)
+      .integer() // must be an integer
+      .min(0) // must be >= 0
+      .default(oldProduct.stock) // if undefined, do not change the stock
   };
 
   return Joi.validate(newProduct, schema);

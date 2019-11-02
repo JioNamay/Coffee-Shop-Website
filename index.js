@@ -1,35 +1,21 @@
-require("dotenv").config();
-
-const express = require("express");
-const path = require("path");
-const { Pool } = require("pg");
-const bodyParser = require("body-parser");
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Database
-pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: false
-});
+app.use('/api/user', require('./routes/user'));
+app.use('/api/shop', require('./routes/shop'));
 
-app.use(function(req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Access-ControlAllow-Headers"
-  );
-  next();
-});
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  })
+}
 
-app.use("/api/user", require("./routes/user"));
-app.use("/api/products", require("./routes/products"));
-
-const PORT = process.env.port || 5000;
-app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

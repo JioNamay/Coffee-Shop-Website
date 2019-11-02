@@ -1,106 +1,162 @@
 const express = require('express');
-const { Router } = 'express';
 const { check, validationResult} = require('express-validator');
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+const uuid = require('uuid');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
-// Database
-pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+//const secrets = require('../secrets');
+const secrets = undefined;
+const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
+const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
+
+const pool = new Pool({
+  connectionString: databaseConnectionString,
   ssl: false
 });
 
-router.get('/', (req, res) => {
-  res.send('Hello');
-});
 
 router.post('/signup',
   [
-    check('email', 'Email must be valid').isEmail(),
-    check('password', 'Password must be 5 or more characters').isLength({ min: 5 })
-  ],
-  async (req, res) => {
-  try {
-    // Detect errors in res
-    const requestErrors = validationResult(req);
-    if (!requestErrors.isEmpty()) {
-      return res.status(400).json({error: requestErrors.array()});
-    }
-
-    // Search for existing user
-    const client = await pool.connect();
-
-    const existingQuery = `SELECT * FROM USERS WHERE email=${req.body.email}`;
-    const result = await client.query(existingQuery);
-    if (result.rows) {
-      return res.status(400).json({ error: [{msg: 'Email already exists'}] });
-    }
-
-    // Create user
-    const salt = await bcrypt.genSalt(8);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    const signupQuery = `INSERT INTO USERS (email, password) VALUES (${req.body.email}, ${hashedPassword})`;
-    await client.query(signupQuery);
-
-    client.release();
-    return res.status(201).send('Signup Successful');
-
-  } catch (error) {
-    return res.status(500).send('Something went wrong');
-  }
-});
-
-router.post('/login',
-  [
-    check('email', 'Enter an email').isEmail(),
-    check('password', 'Enter the password').exists()
+    check('firstName', 'First name must not be empty').not().isEmpty(),
+    check('lastName', 'Last name must not be empty').not().isEmpty(),
+    check('email', 'Email required').isEmail(),
+    check('password', 'Password must be at least 5 characters').isLength({ min: 5 })
   ],
   async (req, res) => {
     try {
-      // Detect errors in res
+      // Check for errors in request
       const requestErrors = validationResult(req);
-      if (!requestErrors.isEmpty()) {
-        return res.status(400).json({ error: requestErrors.array });
+      if(!requestErrors.isEmpty()) {
+        // Outputting errors
+        return res.status(400).json({ errors: requestErrors.array() });
       }
 
-      // Get user
-      const client = await pool.connect();
+      const {
+        firstName,
+        lastName,
+        email,
+        password
+      } = req.body;
 
-      const userQuery = `SELECT * FROM USERS WHERE email=${req.body.email}`;
-      const result = await client.query(userQuery);
-      if (!result.rows) {
-        return res.status(400).json({ error: [{msg: 'User does not exist'}] });
+      // Check if user already exists
+      const db = await pool.connect();
+      const checkExistsQuery = `SELECT * FROM users WHERE email='${email}';`;
+      const checkExists = await db.query(checkExistsQuery);
+      const result = (checkExists) ? checkExists.rows : null;
+      if (result.length > 0) {
+        return res.status(400).json({ errors: 'EMAIL_EXISTS' });
       }
 
-      const user = result.rows;
-      console.log(user);
+      // Create the user
+      const userId = uuid.v4();
+      const salt = await bcrypt.genSalt(8);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Get the user password
-      const password = 'temporary';
-      const correctPassword = await bcrypt.compare(req.body.password, password);
+      const insertUserQuery =
+        `INSERT INTO users(userId, firstName, lastName, email, password) ` +
+        `VALUES ('${userId}', '${firstName}', '${lastName}', '${email}', '${hashedPassword}');`;
+      await db.query(insertUserQuery);
 
-      if (correctPassword) {
-        // Return the json for correct login
-        
-      } else {
-        return res.status(400).json({ error: [{msg: 'Wrong password' }]})
-      }
-
+      db.release();
+      return res.status(201).send('User created');
     } catch (error) {
-      return res.status(500).send('Something went wrong');
+      return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
     }
   }
 );
 
-router.post('/logout', async (req, res) => {
+router.post('/login',
+  [
+    check('email', 'Email required').isEmail(),
+    check('password', 'Password required').not().isEmpty()
+  ],
+  async (req, res) => {
+    try {
+      // Check for errors in request
+      const requestErrors = validationResult(req);
+      if(!requestErrors.isEmpty()) {
+        // Outputting errors
+        return res.status(400).json({ errors: requestErrors.array() });
+      }
+
+      const {
+        email,
+        password
+      } = req.body;
+
+      // Check for valid email
+      const db = await pool.connect();
+      const validEmailQuery = `SELECT * FROM users WHERE email='${email}';`;
+      const validEmail = await db.query(validEmailQuery);
+      const result = (validEmail) ? validEmail.rows : null;
+      if (result.length === 0) {
+        return res.status(400).send({ errors: 'INVALID_LOGIN' });
+      }
+
+      // Check for valid password
+      const passwordResult = result[0].password;
+      const passwordMatches = await bcrypt.compare(password, passwordResult);
+      if (!passwordMatches) {
+        return res.status(400).json({ errors: 'INVALID_LOGIN' });
+      }
+
+      // Successful login
+      db.release();
+      jwt.sign(
+        {
+          userData: {
+            userId: result[0].userid,
+            firstName: result[0].firstname,
+            lastName: result[0].lastname,
+            email: result[0].email
+          }
+        },
+        tokenKey,
+        {
+          expiresIn: '5h'
+        },
+        (error, token) => {
+          return res.status(200).json({
+            token: token,
+            userId: result[0].userid,
+            firstName: result[0].firstname,
+            lastName: result[0].lastname,
+            email: result[0].email
+          });
+        }
+      );
+
+    } catch (error) {
+      return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    }
+  }
+);
+
+router.post('/tokenlogin', async (req, res) => {
   try {
-    // Do logout
+    const {
+      token
+    } = req.body;
+
+    jwt.verify(token, tokenKey, (error, tokenData) => {
+      if (error) {
+        return res.status(403).json({ errors: 'INVALID_TOKEN' });
+      } else {
+        return res.status(200).json({
+          userId: tokenData.userData.userId,
+          firstName: tokenData.userData.firstName,
+          lastName: tokenData.userData.lastName,
+          email: tokenData.userData.email
+        });
+      }
+    })
 
   } catch (error) {
-    return res.status(500).send('Something went wrong');
+    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
   }
 });
-
 
 module.exports = router;

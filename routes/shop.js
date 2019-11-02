@@ -130,7 +130,43 @@ router.put("/:id", async (req, res) => {
 
     res.status(200).json({ items: product }); // as a best practice, send the updated product as a response
   } catch (error) {
-    res.status(500).json({ errors: "Something went wrong." });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+// DELETE a specific product
+router.delete("/:id", async (req, res) => {
+  try {
+    // if the id is not a number, send an error
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId))
+      return res.status(400).json({ errors: "The ID must be a number." });
+
+    // check that the product exists
+    const client = await pool.connect();
+    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
+    const existsResult = await client.query(existsQuery);
+
+    // if the product does not exist, send an error
+    const productExists = existsResult.rows[0].exists;
+    if (!productExists)
+      return res
+        .status(404)
+        .json({ errors: "The product with the given ID was not found." });
+
+    // product exists; get it so that we can send it as a response
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
+    const retrieveResult = await client.query(retrieveQuery);
+    const product = retrieveResult.rows[0];
+
+    // delete the product from the database
+    const deleteQuery = `DELETE FROM items WHERE itemId = '${productId}'`;
+    const deleteResult = await client.query(deleteQuery);
+    client.release();
+
+    res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response
+  } catch (error) {
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 

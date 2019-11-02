@@ -29,6 +29,33 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET a specific product
+router.get("/:id", async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+
+    // check that the product exists
+    const db = await pool.connect();
+    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
+    const existsResult = await db.query(existsQuery);
+
+    // if the product does not exist, send an error
+    const productExists = existsResult.rows[0].exists;
+    if (!productExists)
+      return res
+        .status(404)
+        .send("The product with the given ID was not found.");
+
+    // retrieve the product from the database
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
+    const retrieveResult = await db.query(retrieveQuery);
+    db.release();
+    res.status(200).json(retrieveResult.rows[0]); // send the product
+  } catch (error) {
+    res.status(500).send("Something went wrong.");
+  }
+});
+
 async function verifyToken(token) {
   return await jwt.verify(token, tokenKey, (error, tokenData) => {
     if (error) {

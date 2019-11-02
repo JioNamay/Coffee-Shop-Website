@@ -86,6 +86,54 @@ router.post("/", async (req, res) => {
   }
 });
 
+// PUT (update) a specific product
+router.put("/:id", async (req, res) => {
+  try {
+    // if the id is not a number, send an error
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId))
+      return res.status(400).json({ errors: "The ID must be a number." });
+
+    // check that the product exists
+    const client = await pool.connect();
+    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
+    const existsResult = await client.query(existsQuery);
+
+    // if the product does not exist, send an error
+    const productExists = existsResult.rows[0].exists;
+    if (!productExists)
+      return res
+        .status(404)
+        .json({ errors: "The product with the given ID was not found." });
+
+    // product exists; get it so that we can validate against it and send it as a response
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
+    const retrieveResult = await client.query(retrieveQuery);
+    let product = retrieveResult.rows[0];
+
+    const validationResult = validatePutProduct(product, req.body);
+    const { value } = validationResult;
+    const { error } = validationResult;
+    // if there was an error with the validation, send an error
+    if (error)
+      return res.status(400).json({ errors: error.details[0].message });
+
+    // update the product in the database
+    const updateQuery = `UPDATE items SET name = ${value.name}, description = ${value.description}, price = ${value.price}, image = ${value.image} WHERE itemId = '${productId}'`;
+    const updateResult = await client.query(updateQuery);
+
+    product.name = value.name;
+    product.description = value.description;
+    product.price = value.price;
+    product.image = value.image;
+    client.release();
+
+    res.status(200).json({ items: product }); // as a best practice, send the updated product as a response
+  } catch (error) {
+    res.status(500).json({ errors: "Something went wrong." });
+  }
+});
+
 async function verifyToken(token) {
   return await jwt.verify(token, tokenKey, (error, tokenData) => {
     if (error) {

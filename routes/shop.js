@@ -187,4 +187,28 @@ function validatePostProduct(product) {
   return Joi.validate(product, schema);
 }
 
+/**
+ * Validates the PUT request body using the PUT request body schema.
+ * @param {object} oldProduct
+ * @param {object} newProduct
+ * @return {ValidationResult<any>} The joi validation result.
+ */
+function validatePutProduct(oldProduct, newProduct) {
+  const schema = {
+    name: Joi.string()
+      .min(1) // minimum 1 character required
+      .default(oldProduct.name), // if undefined, do not change the name
+    description: Joi.string().default(oldProduct.description), // if undefined, do not change the description
+    price: Joi.number()
+      .positive() // must be a positive number
+      .precision(2) // maximum 2 decimal places
+      .default(oldProduct.price), // if undefined, do not change the price
+    image: Joi.string()
+      .uri() // must be a valid RFC 3986 URI
+      .default(oldProduct.image) // if undefined, do not change the image
+  };
+
+  return Joi.validate(newProduct, schema);
+}
+
 module.exports = router;

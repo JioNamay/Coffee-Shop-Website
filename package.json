@@ -8,8 +8,7 @@
     "index": "nodemon index",
     "client": "npm start --prefix ./client",
     "dev": "concurrently \"npm run index\" \"npm run client\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",

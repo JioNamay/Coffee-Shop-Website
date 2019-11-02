@@ -36,7 +36,7 @@ router.get("/:id", async (req, res) => {
     // if the id is not a number, send an error
     const productId = parseInt(req.params.id);
     if (Number.isNaN(productId))
-      return res.status(400).send("The ID must be a number.");
+      return res.status(400).json({ errors: "The ID must be a number." });
 
     // check that the product exists
     const db = await pool.connect();
@@ -48,13 +48,13 @@ router.get("/:id", async (req, res) => {
     if (!productExists)
       return res
         .status(404)
-        .send("The product with the given ID was not found.");
+        .json({ errors: "The product with the given ID was not found." });
 
     // retrieve the product from the database
     const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
     const retrieveResult = await db.query(retrieveQuery);
     db.release();
-    res.status(200).json(retrieveResult.rows[0]); // send the product
+    res.status(200).json({ items: retrieveResult.rows[0] }); // send the product
   } catch (error) {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
@@ -67,7 +67,8 @@ router.post("/", async (req, res) => {
     const { value } = result;
     const { error } = result;
     // if there was an error with the validation, send an error
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error)
+      return res.status(400).json({ errors: error.details[0].message });
 
     const client = await pool.connect();
     const insertQuery = `INSERT INTO items (name, description, price, image) VALUES ('${value.name}', '${value.description}', '${value.price}', '${value.image}'); SELECT currval('items_itemId_seq')`;

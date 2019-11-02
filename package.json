@@ -22,7 +22,8 @@
     "express": "^4.17.1",
     "express-validator": "^6.2.0",
     "jsonwebtoken": "^8.5.1",
-    "pg": "^7.12.1"
+    "pg": "^7.12.1",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "concurrently": "^4.1.2",

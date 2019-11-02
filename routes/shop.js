@@ -80,7 +80,7 @@ router.post("/", async (req, res) => {
     const retrieveResult = await client.query(retrieveQuery);
     client.release();
 
-    res.status(201).json(retrieveResult.rows[0]); // as a best practice, send the posted product as a response
+    res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
   } catch (error) {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }

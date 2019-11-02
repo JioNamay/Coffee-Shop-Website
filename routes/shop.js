@@ -60,6 +60,31 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// POST a product
+router.post("/", async (req, res) => {
+  try {
+    const result = validatePostProduct(req.body);
+    const { value } = result;
+    const { error } = result;
+    // if there was an error with the validation, send an error
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const client = await pool.connect();
+    const insertQuery = `INSERT INTO items (name, description, price, image) VALUES ('${value.name}', '${value.description}', '${value.price}', '${value.image}'); SELECT currval('items_itemId_seq')`;
+    const insertResult = await client.query(insertQuery);
+
+    // retrieve the newly added product
+    const productId = insertResult[1].rows[0].currval;
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
+    const retrieveResult = await client.query(retrieveQuery);
+    client.release();
+
+    res.status(201).json(retrieveResult.rows[0]); // as a best practice, send the posted product as a response
+  } catch (error) {
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
 async function verifyToken(token) {
   return await jwt.verify(token, tokenKey, (error, tokenData) => {
     if (error) {

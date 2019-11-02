@@ -1,7 +1,7 @@
 const express = require("express");
 const { Router } = "express";
 const Joi = require("@hapi/joi"); // joi validation tool
-const { Pool } = require("pg");
+const { Pool } = require("pg"); // postgres
 
 const router = express.Router();
 

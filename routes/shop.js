@@ -1,6 +1,6 @@
-const express = require('express');
-const { Pool } = require('pg');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const { Pool } = require("pg");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
@@ -14,61 +14,58 @@ const pool = new Pool({
   ssl: false
 });
 
-router.get('/all', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const db = await pool.connect();
     const allItemsQuery = `SELECT * FROM items;`;
     const allItems = await db.query(allItemsQuery);
 
-    const result = (allItems) ? allItems.rows : null;
+    const result = allItems ? allItems.rows : null;
 
     db.release();
-    return res.status(200).json({'items': result});
+    return res.status(200).json({ items: result });
   } catch (error) {
-    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 
-async function verifyToken (token) {
+async function verifyToken(token) {
   return await jwt.verify(token, tokenKey, (error, tokenData) => {
     if (error) {
-      throw new Error('INVALID_TOKEN');
+      throw new Error("INVALID_TOKEN");
     } else {
       return tokenData.userData.userId;
     }
   });
 }
 
-router.get('/cart', async (req, res) => {
+router.get("/cart", async (req, res) => {
   try {
     // Verify token
-    const token = req.headers['authorization'];
+    const token = req.headers["authorization"];
     const userId = await verifyToken(token);
 
     const db = await pool.connect();
     const cartQuery = `SELECT cartitemid, itemid, name, description, price, image FROM cart NATURAL JOIN users INNER JOIN items ON item=items.itemid WHERE buyer='${userId}';`;
     const cart = await db.query(cartQuery);
-    const cartResults = (cart) ? cart.rows : null;
+    const cartResults = cart ? cart.rows : null;
 
     db.release();
-    return res.status(200).json({'cart': cartResults});
+    return res.status(200).json({ cart: cartResults });
   } catch (error) {
-    if (error.message === 'INVALID_TOKEN') {
-      return res.status(403).json({ errors: 'INVALID_TOKEN' });
+    if (error.message === "INVALID_TOKEN") {
+      return res.status(403).json({ errors: "INVALID_TOKEN" });
     }
-    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 
-router.post('/cart', async (req, res) => {
+router.post("/cart", async (req, res) => {
   try {
-    const {
-      cartItemId,
-      itemId,
-    } = req.body;
+    const { cartItemId, itemId } = req.body;
 
     // Verify token
-    const token = req.headers['authorization'];
+    const token = req.headers["authorization"];
     const userId = await verifyToken(token);
 
     // Insert into database
@@ -79,17 +76,17 @@ router.post('/cart', async (req, res) => {
 
     return res.status(201);
   } catch (error) {
-    if (error.message === 'INVALID_TOKEN') {
-      return res.status(403).json({ errors: 'INVALID_TOKEN' });
+    if (error.message === "INVALID_TOKEN") {
+      return res.status(403).json({ errors: "INVALID_TOKEN" });
     }
-    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 
-router.delete('/cart/:cart_item_id', async (req, res) => {
+router.delete("/cart/:cart_item_id", async (req, res) => {
   try {
     // Verify token
-    const token = req.headers['authorization'];
+    const token = req.headers["authorization"];
     await verifyToken(token);
 
     const cartItemId = req.params.cart_item_id;
@@ -102,7 +99,7 @@ router.delete('/cart/:cart_item_id', async (req, res) => {
     db.release();
     return res.status(200);
   } catch (error) {
-    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 

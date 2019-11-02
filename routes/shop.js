@@ -265,7 +265,7 @@ function validatePostProduct(product) {
       .uri() // must be a valid RFC 3986 URI
       .empty(null) // if null, make it undefined
       .default(
-        "https://www.joyfulhealthyeats.com/wp-content/uploads/2018/04/Sweet-Cream-Iced-Coffee-web-9.jpg"
+        "https://images-na.ssl-images-amazon.com/images/I/51O-6mAvpwL._AC_SL1200_.jpg"
       ) // if image undefined, set it to this default image
   };
 

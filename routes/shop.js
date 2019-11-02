@@ -33,7 +33,10 @@ router.get("/", async (req, res) => {
 // GET a specific product
 router.get("/:id", async (req, res) => {
   try {
-    const productId = req.params.id;
+    // if the id is not a number, send an error
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId))
+      return res.status(400).send("The ID must be a number.");
 
     // check that the product exists
     const db = await pool.connect();
@@ -138,9 +141,6 @@ router.delete("/cart/:cart_item_id", async (req, res) => {
  */
 function validatePostProduct(product) {
   const schema = {
-    itemId: Joi.string()
-      .min(1) // minimum 1 character required
-      .required(), // itemId is mandatory
     name: Joi.string()
       .min(1) // minimum 1 character required
       .required(), // name is mandatory

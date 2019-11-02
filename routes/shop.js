@@ -1,6 +1,7 @@
 const express = require("express");
 const { Pool } = require("pg");
 const jwt = require("jsonwebtoken");
+const Joi = require("@hapi/joi"); // joi validation tool
 
 const router = express.Router();
 
@@ -32,7 +33,7 @@ router.get("/", async (req, res) => {
 // GET a specific product
 router.get("/:id", async (req, res) => {
   try {
-    const productId = parseInt(req.params.id);
+    const productId = req.params.id;
 
     // check that the product exists
     const db = await pool.connect();
@@ -52,7 +53,7 @@ router.get("/:id", async (req, res) => {
     db.release();
     res.status(200).json(retrieveResult.rows[0]); // send the product
   } catch (error) {
-    res.status(500).send("Something went wrong.");
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 
@@ -129,5 +130,36 @@ router.delete("/cart/:cart_item_id", async (req, res) => {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
+
+/**
+ * Validates the POST request body using the POST request body schema.
+ * @param {object} product
+ * @return {ValidationResult<any>} The joi validation result.
+ */
+function validatePostProduct(product) {
+  const schema = {
+    itemId: Joi.string()
+      .min(1) // minimum 1 character required
+      .required(), // itemId is mandatory
+    name: Joi.string()
+      .min(1) // minimum 1 character required
+      .required(), // name is mandatory
+    description: Joi.string()
+      .empty(null) // if null, make it undefined
+      .default("covfefe"), // if description undefined, set it to covfefe
+    price: Joi.number()
+      .positive() // must be a positive number
+      .precision(2) // maximum 2 decimal places
+      .required(), // price is mandatory
+    image: Joi.string()
+      .uri() // must be a valid RFC 3986 URI
+      .empty(null) // if null, make it undefined
+      .default(
+        "https://www.joyfulhealthyeats.com/wp-content/uploads/2018/04/Sweet-Cream-Iced-Coffee-web-9.jpg"
+      ) // if image undefined, set it to this default image
+  };
+
+  return Joi.validate(product, schema);
+}
 
 module.exports = router;

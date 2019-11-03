@@ -59,39 +59,40 @@ router.get("/items/:id", async (req, res) => {
 
 // POST a product
 router.post("/items", async (req, res) => {
-  // try {
-  const result = validatePostProduct(req.body);
-  const { value } = result;
-  const { error } = result;
-  // if there was an error with the validation, send an error
-  if (error) return res.status(400).json({ errors: error.details[0].message });
+  try {
+    const result = validatePostProduct(req.body);
+    const { value } = result;
+    const { error } = result;
+    // if there was an error with the validation, send an error
+    if (error)
+      return res.status(400).json({ errors: error.details[0].message });
 
-  const client = await pool.connect();
+    const db = await pool.connect();
 
-  // check if an item with that itemId already exists
-  const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
-  const existsResult = await db.query(existsQuery);
+    // check if an item with that itemId already exists
+    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
+    const existsResult = await db.query(existsQuery);
 
-  // if the itemId is already in use, send an error
-  const productExists = existsResult.rows[0].exists;
-  if (productExists)
-    return res.status(409).json({
-      errors:
-        "There is already an item with that itemId. itemId must be unique."
-    });
+    // if the itemId is already in use, send an error
+    const productExists = existsResult.rows[0].exists;
+    if (productExists)
+      return res.status(409).json({
+        errors:
+          "There is already an item with that itemId. itemId must be unique."
+      });
 
-  const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
-  const insertResult = await client.query(insertQuery);
+    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
+    const insertResult = await db.query(insertQuery);
 
-  // retrieve the newly added product
-  const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
-  const retrieveResult = await client.query(retrieveQuery);
-  client.release();
+    // retrieve the newly added product
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
+    const retrieveResult = await db.query(retrieveQuery);
+    db.release();
 
-  res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
-  // } catch (error) {
-  // return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
-  // }
+    res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
+  } catch (error) {
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  }
 });
 
 // PUT (update) a specific product
@@ -100,9 +101,9 @@ router.put("/items/:id", async (req, res) => {
     const productId = req.params.id;
 
     // check that the product exists
-    const client = await pool.connect();
+    const db = await pool.connect();
     const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
-    const existsResult = await client.query(existsQuery);
+    const existsResult = await db.query(existsQuery);
 
     // if the product does not exist, send an error
     const productExists = existsResult.rows[0].exists;
@@ -113,7 +114,7 @@ router.put("/items/:id", async (req, res) => {
 
     // product exists; get it so that we can validate against it and send it as a response
     const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
-    const retrieveResult = await client.query(retrieveQuery);
+    const retrieveResult = await db.query(retrieveQuery);
     let product = retrieveResult.rows[0];
 
     const validationResult = validatePutProduct(product, req.body);
@@ -143,14 +144,14 @@ router.put("/items/:id", async (req, res) => {
 
     // update the product in the database
     const updateQuery = `UPDATE items SET itemId = ${value.itemId}, name = ${value.name}, description = ${value.description}, price = ${value.price}, image = ${value.image} WHERE itemId = '${productId}'`;
-    const updateResult = await client.query(updateQuery);
+    const updateResult = await db.query(updateQuery);
 
     product.itemId = value.itemId;
     product.name = value.name;
     product.description = value.description;
     product.price = value.price;
     product.image = value.image;
-    client.release();
+    db.release();
 
     res.status(200).json({ items: product }); // as a best practice, send the updated product as a response
   } catch (error) {
@@ -164,9 +165,9 @@ router.delete("/items/:id", async (req, res) => {
     const productId = req.params.id;
 
     // check that the product exists
-    const client = await pool.connect();
+    const db = await pool.connect();
     const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
-    const existsResult = await client.query(existsQuery);
+    const existsResult = await db.query(existsQuery);
 
     // if the product does not exist, send an error
     const productExists = existsResult.rows[0].exists;
@@ -177,13 +178,13 @@ router.delete("/items/:id", async (req, res) => {
 
     // product exists; get it so that we can send it as a response
     const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
-    const retrieveResult = await client.query(retrieveQuery);
+    const retrieveResult = await db.query(retrieveQuery);
     const product = retrieveResult.rows[0];
 
     // delete the product from the database
     const deleteQuery = `DELETE FROM items WHERE itemId = '${productId}'`;
-    const deleteResult = await client.query(deleteQuery);
-    client.release();
+    const deleteResult = await db.query(deleteQuery);
+    db.release();
 
     res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response
   } catch (error) {

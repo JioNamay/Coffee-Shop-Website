@@ -30,9 +30,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-/*
 // GET a specific product
-router.get("/:id", async (req, res) => {
+router.get("/items/:id", async (req, res) => {
   try {
     // if the id is not a number, send an error
     const productId = parseInt(req.params.id);
@@ -62,7 +61,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST a product
-router.post("/", async (req, res) => {
+router.post("/items", async (req, res) => {
   try {
     const result = validatePostProduct(req.body);
     const { value } = result;
@@ -88,7 +87,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT (update) a specific product
-router.put("/:id", async (req, res) => {
+router.put("/items/:id", async (req, res) => {
   try {
     // if the id is not a number, send an error
     const productId = parseInt(req.params.id);
@@ -136,7 +135,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE a specific product
-router.delete("/:id", async (req, res) => {
+router.delete("/items/:id", async (req, res) => {
   try {
     // if the id is not a number, send an error
     const productId = parseInt(req.params.id);
@@ -170,7 +169,6 @@ router.delete("/:id", async (req, res) => {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
-*/
 
 async function verifyToken(token) {
   return await jwt.verify(token, tokenKey, (error, tokenData) => {
@@ -249,6 +247,7 @@ router.delete("/cart/:cart_item_id", async (req, res) => {
   }
 });
 
+
 router.post('/cart/order', async (req, res) => {
   try {
     const {
@@ -259,6 +258,7 @@ router.post('/cart/order', async (req, res) => {
     const token = req.headers['authorization'];
     const userId = await verifyToken(token);
 
+    // Add all orders
     const db = await pool.connect();
     for (const order in orders) {
       if (orders.hasOwnProperty(order)) {
@@ -270,6 +270,7 @@ router.post('/cart/order', async (req, res) => {
       }
     }
 
+    // Delete cart data
     const deleteCartQuery = `DELETE FROM cart WHERE buyer='${userId}';`;
     await db.query(deleteCartQuery);
 
@@ -289,6 +290,7 @@ router.get('/orders', async (req, res) => {
     const token = req.headers['authorization'];
     const userId = await verifyToken(token);
 
+    // Get order history
     const db = await pool.connect();
     const orderHistoryQuery = `SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders NATURAL JOIN users INNER JOIN items ON item=items.itemId WHERE buyer='${userId}' AND archived='f';`;
     const orderHistory = await db.query(orderHistoryQuery);
@@ -296,7 +298,6 @@ router.get('/orders', async (req, res) => {
 
     db.release();
     return res.status(200).json({'orderHistory': orderHistoryResults});
-
   } catch (error) {
     if (error.message === 'INVALID_TOKEN') {
       return res.status(403).json({ errors: 'INVALID_TOKEN' });

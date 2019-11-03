@@ -39,6 +39,16 @@
     top: 50%;
 }
 
+.signup-link-container {
+    text-align: center;
+    margin-top: 5vh;
+}
+
+.identify-link {
+    padding: 0;
+    display: inline-block;
+}
+
 .signup-page, .login-page {
     max-width: 50%;
     margin: auto;
@@ -51,7 +61,7 @@
     margin-bottom: 2rem;
 }
 
-.signup-button, .login-button {
+.signup-button, .login-button, .reset-button, .reset-password-button {
     background-color: #000000;
     color: #ffffff;
     border: 0;
@@ -62,7 +72,9 @@
 }
 
 .signup-button:disabled, .signup-button[disabled],
-.login-button:disabled, .login-button[disabled] {
+.login-button:disabled, .login-button[disabled],
+.reset-button:disabled, .reset-button[disabled],
+.reset-password-button:disabled, .reset-password-button[disabled]{
     background-color: #cccccc;
     color: grey;
 }
@@ -70,6 +82,14 @@
 .error-message {
     padding: 5px;
     color: red;
+}
+
+/*
+CSS for Reset Password Section
+ */
+.identify-section, .verify-reset-section {
+    margin: 3rem auto 3rem auto;
+    max-width: 50%;
 }
 
 .browse-page {
@@ -187,7 +207,7 @@
     margin: 3rem auto 3rem auto;
 }
 
-.cart-section h2, .order-history-section h2 {
+.cart-section h2, .order-history-section h2, .reset-header, .reset-password-header {
     text-align: center;
     width: 50%;
     padding-bottom: 1vh;

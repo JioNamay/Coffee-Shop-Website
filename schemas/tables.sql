@@ -10,7 +10,7 @@ CREATE TABLE users
 
 CREATE TABLE items
 (
-    itemId SERIAL PRIMARY KEY, -- itemId no longer needs to be specified because it is SERIAL. Postgres will automatically assign an ID and increment ID numbers when inserting new entries"
+    itemId VARCHAR(256) PRIMARY KEY,
     name VARCHAR(128) NOT NULL,
     description VARCHAR(256) NOT NULL,
     price NUMERIC NOT NULL CONSTRAINT proper_price CHECK (price >= 0),
@@ -37,6 +37,14 @@ CREATE TABLE orders
     CONSTRAINT buyer_ref FOREIGN KEY (buyer) REFERENCES users(userID),
     CONSTRAINT item_ref FOREIGN KEY (item) REFERENCES items(itemId),
     PRIMARY KEY (orderItemId)
+);
+
+CREATE TABLE resettokens
+(
+    userId UUID NOT NULL,
+    email VARCHAR(256) NOT NULL,
+    token VARCHAR(512) NOT NULL,
+    PRIMARY KEY (userId, token)
 );
 
 SELECT * FROM orders NATURAL JOIN users INNER JOIN items ON item=items.itemId;

@@ -40,13 +40,13 @@ const Signup = (props) => {
   };
 
   const setInput = (e) => {
-    const name = e.target.value;
-    let validFirstName = name !== '';
+    const value = e.target.value;
+    let validInput = value !== '';
     let targetValid = e.target.name + 'Valid';
     setSignupInfo({
       ...signupInfo,
       [e.target.name]: e.target.value,
-      [targetValid]: validFirstName
+      [targetValid]: validInput
     })
   };
 
@@ -58,6 +58,17 @@ const Signup = (props) => {
       [e.target.name]: email,
       emailValid: validEmail
     });
+  };
+
+  const setPassword = (e) => {
+    const password = e.target.value;
+    let validPassword = password !== '' && password.length >= 5;
+    let targetValid = e.target.name + 'Valid';
+    setSignupInfo({
+      ...signupInfo,
+      [e.target.name]: e.target.value,
+      [targetValid]: validPassword
+    })
   };
 
   const setConfirmPassword = (e) => {
@@ -163,7 +174,7 @@ const Signup = (props) => {
               required
               minLength={5}
               value={signupInfo.password}
-              onChange={e => setInput(e)}
+              onChange={e => setPassword(e)}
               onBlur={(e) => {onBlur(e)}}
             />
             {

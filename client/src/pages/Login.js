@@ -4,6 +4,7 @@ import * as EmailValidator from 'email-validator';
 
 import { loginAction } from "../store/actions/userActions";
 import { tokenLoginAction } from "../store/actions/userActions";
+import {Link} from "react-router-dom";
 
 const Login = (props) => {
   let {
@@ -111,7 +112,7 @@ const Login = (props) => {
         }
         <form onSubmit={(e) => {onLogin(e)}}>
           <div className="form-group">
-            <label htmlFor="email">Email address</label>
+            <label>Email address</label>
             <input
               type="email"
               className="form-control"
@@ -127,7 +128,7 @@ const Login = (props) => {
             }
           </div>
           <div className="form-group">
-            <label htmlFor="pwd">Password</label>
+            <label>Password</label>
             <input
               type="password"
               className="form-control"
@@ -142,6 +143,9 @@ const Login = (props) => {
               <small><p className="error-message">Password required</p></small>
             }
           </div>
+          <Link to="/login/identify" className="nav-link identify-link">
+            <p>Forgot your password?</p>
+          </Link>
           <button
             type="submit"
             className="login-button"
@@ -149,6 +153,12 @@ const Login = (props) => {
               !loginInfo.emailValid || !loginInfo.passwordValid
             }
           >Login</button>
+
+          <div className="signup-link-container">
+            <Link to="/signup" className="nav-link">
+              <p>Don't have an account? Sign up now</p>
+            </Link>
+          </div>
         </form>
       </div>
     </div>

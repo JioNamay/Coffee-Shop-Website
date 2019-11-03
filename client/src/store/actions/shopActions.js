@@ -42,7 +42,6 @@ export const getCartAction = () => {
           Authorization: `${user.token}`
         }
       };
-      console.log('GHERE');
       const getCartRequest = await axios.get("/api/shop/cart", tokenConfig);
 
       dispatch({

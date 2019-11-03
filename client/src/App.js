@@ -18,8 +18,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Browse from "./pages/Browse";
 import Cart from "./pages/Cart";
+import VerifyReset from "./pages/VerifyReset";
 import OrderHistory from "./pages/OrderHistory";
 import {ToastContainer, toast} from "react-toastify";
+import Identify from "./pages/Identify";
 
 const App = () => {
   const rootReducer = combineReducers({
@@ -44,6 +46,8 @@ const App = () => {
             <Route exact path="/signup" component={Signup} />
             <Route exact path="/cart" component={Cart} />
             <Route exact path="/history" component={OrderHistory} />
+            <Route exact path="/login/identify" component={Identify} />
+            <Route path="/login/verifyreset" component={VerifyReset} />
           </Switch>
         </Fragment>
       </Router>

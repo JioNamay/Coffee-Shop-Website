@@ -4,6 +4,8 @@ export const LOGIN = 'LOGIN';
 export const SIGNUP = 'SIGNUP';
 export const LOGOUT = 'LOGOUT';
 export const TOKEN_LOGIN = 'TOKEN_LOGIN';
+export const RESET_EMAIL = 'RESET_EMAIL';
+export const DO_RESET_PASSWORD = 'DO_RESET_PASSWORD';
 
 const config = {
   headers: {
@@ -72,6 +74,35 @@ export const tokenLoginAction = (token) => {
       });
     } catch (error) {
       throw new Error();
+    }
+  }
+};
+
+export const resetPasswordAction = (email) => {
+  return async dispatch => {
+    try {
+      const body = JSON.stringify({email});
+      axios.post('/api/user/identify', body, config);
+      dispatch({
+        type: RESET_EMAIL
+      });
+    } catch (error) {
+
+    }
+  }
+};
+
+export const doResetAction = (token, password) => {
+  return async dispatch => {
+    try {
+      const body = JSON.stringify({token, password});
+      const passwordResetRequest = await axios.post('/api/user/passwordreset', body, config);
+
+      dispatch({
+        type: DO_RESET_PASSWORD
+      });
+    } catch (error) {
+      throw new Error(error.response.data.errors);
     }
   }
 };

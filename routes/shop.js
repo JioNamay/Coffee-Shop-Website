@@ -59,40 +59,39 @@ router.get("/items/:id", async (req, res) => {
 
 // POST a product
 router.post("/items", async (req, res) => {
-  try {
-    const result = validatePostProduct(req.body);
-    const { value } = result;
-    const { error } = result;
-    // if there was an error with the validation, send an error
-    if (error)
-      return res.status(400).json({ errors: error.details[0].message });
+  // try {
+  const result = validatePostProduct(req.body);
+  const { value } = result;
+  const { error } = result;
+  // if there was an error with the validation, send an error
+  if (error) return res.status(400).json({ errors: error.details[0].message });
 
-    const client = await pool.connect();
+  const client = await pool.connect();
 
-    // check if an item with that itemId already exists
-    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
-    const existsResult = await db.query(existsQuery);
+  // check if an item with that itemId already exists
+  const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
+  const existsResult = await db.query(existsQuery);
 
-    // if the itemId is already in use, send an error
-    const productExists = existsResult.rows[0].exists;
-    if (productExists)
-      return res.status(409).json({
-        errors:
-          "There is already an item with that itemId. itemId must be unique."
-      });
+  // if the itemId is already in use, send an error
+  const productExists = existsResult.rows[0].exists;
+  if (productExists)
+    return res.status(409).json({
+      errors:
+        "There is already an item with that itemId. itemId must be unique."
+    });
 
-    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
-    const insertResult = await client.query(insertQuery);
+  const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
+  const insertResult = await client.query(insertQuery);
 
-    // retrieve the newly added product
-    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
-    const retrieveResult = await client.query(retrieveQuery);
-    client.release();
+  // retrieve the newly added product
+  const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
+  const retrieveResult = await client.query(retrieveQuery);
+  client.release();
 
-    res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
-  } catch (error) {
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
-  }
+  res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
+  // } catch (error) {
+  // return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  // }
 });
 
 // PUT (update) a specific product

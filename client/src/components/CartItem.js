@@ -18,12 +18,18 @@ const CartItem = (props) => {
 
   return (
     <div className="cart-card">
-      <h3>{itemName}</h3>
       <div className="cart-card-image">
-        <img src={itemImage} alt={itemName}/>
+        <img src={itemImage} alt={itemName} />
       </div>
-      <p>{itemPrice}</p>
-      <button onClick={() => {onCartRemove(cartItemId)}}>Remove from Cart</button>
+      <div className="cart-card-name">
+        <p>{itemName}</p>
+      </div>
+      <div className="cart-card-price">
+        <p>${itemPrice}</p>
+      </div>
+      <div className="cart-card-options">
+        <button onClick={() => {onCartRemove(cartItemId)}}>&#10006;</button>
+      </div>
     </div>
   )
 };

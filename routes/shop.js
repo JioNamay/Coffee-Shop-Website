@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
-//const secrets = require('../secrets');
-const secrets = undefined;
+const secrets = require('../secrets');
+//const secrets = undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
 
@@ -102,6 +102,65 @@ router.delete('/cart/:cart_item_id', async (req, res) => {
     db.release();
     return res.status(200);
   } catch (error) {
+    if (error.message === 'INVALID_TOKEN') {
+      return res.status(403).json({ errors: 'INVALID_TOKEN' });
+    }
+    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+  }
+});
+
+router.post('/cart/order', async (req, res) => {
+  try {
+    const {
+      orders
+    } = req.body;
+
+    // Verify token
+    const token = req.headers['authorization'];
+    const userId = await verifyToken(token);
+
+    const db = await pool.connect();
+    for (const order in orders) {
+      if (orders.hasOwnProperty(order)) {
+        const orderItemId = orders[order].orderItemId;
+        const itemId = orders[order].itemId;
+        const date = orders[order].date;
+        const insertOrderQuery = `INSERT INTO orders (orderItemId, buyer, item, dateOrdered) VALUES ('${orderItemId}', '${userId}', '${itemId}', '${date}');`;
+        await db.query(insertOrderQuery);
+      }
+    }
+
+    const deleteCartQuery = `DELETE FROM cart WHERE buyer='${userId}';`;
+    await db.query(deleteCartQuery);
+
+    db.release();
+    return res.status(201).send('Cart Ordered');
+  } catch (error) {
+    if (error.message === 'INVALID_TOKEN') {
+      return res.status(403).json({ errors: 'INVALID_TOKEN' });
+    }
+    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+  }
+});
+
+router.get('/orders', async (req, res) => {
+  try {
+    // Verify token
+    const token = req.headers['authorization'];
+    const userId = await verifyToken(token);
+
+    const db = await pool.connect();
+    const orderHistoryQuery = `SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders NATURAL JOIN users INNER JOIN items ON item=items.itemId WHERE buyer='${userId}' AND archived='f';`;
+    const orderHistory = await db.query(orderHistoryQuery);
+    const orderHistoryResults = (orderHistory) ? orderHistory.rows : null;
+
+    db.release();
+    return res.status(200).json({'orderHistory': orderHistoryResults});
+
+  } catch (error) {
+    if (error.message === 'INVALID_TOKEN') {
+      return res.status(403).json({ errors: 'INVALID_TOKEN' });
+    }
     return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
   }
 });

@@ -30,6 +30,14 @@ const Navigation = (props) => {
             {
               user &&
               <li className="nav-item active">
+                <Link to="/history" className="nav-link">
+                  Order History
+                </Link>
+              </li>
+            }
+            {
+              user &&
+              <li className="nav-item active">
                 <Link to="/" className="nav-link">
                   Account
                 </Link>

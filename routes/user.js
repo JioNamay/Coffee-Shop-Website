@@ -7,8 +7,8 @@ const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
-//const secrets = require('../secrets');
-const secrets = undefined;
+const secrets = require('../secrets');
+//const secrets = undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
 
@@ -18,7 +18,8 @@ const pool = new Pool({
 });
 
 
-router.post('/signup',
+router.post(
+  '/signup',
   [
     check('firstName', 'First name must not be empty').not().isEmpty(),
     check('lastName', 'Last name must not be empty').not().isEmpty(),
@@ -28,10 +29,9 @@ router.post('/signup',
   async (req, res) => {
     try {
       // Check for errors in request
-      const requestErrors = validationResult(req);
-      if(!requestErrors.isEmpty()) {
+      if(!validationResult(req).isEmpty()) {
         // Outputting errors
-        return res.status(400).json({ errors: requestErrors.array() });
+        return res.status(400).json({ errors: validationResult(req).array() });
       }
 
       const {
@@ -68,7 +68,8 @@ router.post('/signup',
   }
 );
 
-router.post('/login',
+router.post(
+  '/login',
   [
     check('email', 'Email required').isEmail(),
     check('password', 'Password required').not().isEmpty()
@@ -76,10 +77,9 @@ router.post('/login',
   async (req, res) => {
     try {
       // Check for errors in request
-      const requestErrors = validationResult(req);
-      if(!requestErrors.isEmpty()) {
+      if(!validationResult(req).isEmpty()) {
         // Outputting errors
-        return res.status(400).json({ errors: requestErrors.array() });
+        return res.status(400).json({ errors: validationResult(req).array() });
       }
 
       const {

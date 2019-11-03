@@ -3,9 +3,6 @@
     margin: 3rem auto 3rem;
 }
 
-/*
-Navbar
- */
 .navbar {
     top: 0;
     width: 100%;
@@ -21,9 +18,6 @@ Navbar
     margin-right: 5px;
 }
 
-/*
-Home Page
- */
 .home {
     position: relative;
     background-image: url('./images/background.jpg');
@@ -35,9 +29,16 @@ Home Page
     height: 100vh;
 }
 
-/*
-Signup and Login Page
- */
+.home-div h1 {
+    position: absolute;
+    transform: translate(50%, -50%);
+    color: white;
+    font-size: 10vh;
+    z-index: 5;
+    right: 50%;
+    top: 50%;
+}
+
 .signup-page, .login-page {
     max-width: 50%;
     margin: auto;
@@ -71,9 +72,6 @@ Signup and Login Page
     color: red;
 }
 
-/*
-Browse Page
- */
 .browse-page {
     text-align: center;
     padding: 0 3rem;
@@ -182,29 +180,111 @@ Browse Page
     background-color: #674834;
 }
 
-/*
-Cart Page
- */
-.cart-section {
+.cart-section, .order-history-section {
     text-align: center;
     padding: 0 3rem;
     align-items: center;
-    margin: 3rem 5rem 3rem 5rem;
+    margin: 3rem auto 3rem auto;
 }
 
-.cart-section h2 {
+.cart-section h2, .order-history-section h2 {
     text-align: center;
     width: 50%;
     padding-bottom: 1vh;
     margin: 0 auto 1rem auto;
 }
 
-.cart-card {
-    align-items: center;
-    justify-content: center;
+.cart-items, .order-history-items  {
+    margin: 0 auto 2rem auto;
+    width: 40%;
+    border: 1px solid #DDDDDD;
+    border-radius: 10px;
+    background-color: #FFFFFF;
+    box-shadow: 0 3px 5px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    overflow: hidden;
 }
 
-.cart-card-image img {
-    max-width: 200px;
-    max-height: 200px;
+.cart-card, .order-history-card {
+    display: flex;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.cart-card-image, .order-history-image {
+    margin: 1em 3em 1em 3em;
+    min-width: 150px;
+}
+
+.cart-card-image img, .order-history-card img  {
+    max-width: 150px;
+    max-height: 150px;
+}
+
+.cart-card-name, .order-history-name {
+    min-width: 15%;
+    max-width: 15%;
+    text-align: left;
+}
+
+.cart-card-name p, .order-history-name p {
+    padding-top: 1rem;
+    font-size: 16px;
+}
+
+.cart-card-price, .order-history-price {
+    margin-left: 3rem;
+    min-width: 20%;
+    max-width: 20%;
+    min-height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.cart-card-price p {
+    padding-top: 3rem;
+    font-size: 18px;
+}
+
+.order-history-price {
+    margin-left: 2rem;
+    padding-top: 1rem;
+}
+
+.order-history-date p {
+    margin-bottom: 0;
+}
+
+.cart-card-options, .order-history-options {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.cart-card-options button {
+    margin-left: 5rem;
+    background-color: #FFFFFF;
+    border: none;
+    font-size: 28px;
+}
+
+#cart-order-button {
+    background-color: black;
+    border: none;
+    color: white;
+    padding: 0.8rem;
+    border-radius: 5px;
+}
+
+.order-history-section {
+    text-align: center;
+}
+
+.order-history-options button {
+    margin-left: 1rem;
+    font-size: 12px;
+    border: none;
+    background-color: #000000;
+    color: white;
+    border-radius: 5px;
 }

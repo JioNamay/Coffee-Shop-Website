@@ -2,8 +2,11 @@ import React from 'react';
 
 const Home = () => {
   return (
-    <section className="home">
-    </section>
+    <div className="home-div">
+      <section className="home">
+      </section>
+      <h1>Aroma Coffee</h1>
+    </div>
   )
 };
 

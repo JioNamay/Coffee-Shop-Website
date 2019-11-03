@@ -3,6 +3,9 @@ import { connect } from 'react-redux';
 
 import { addCartAction } from "../store/actions/shopActions";
 
+import { toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+
 const ShopItem = (props) => {
   let {
     user,
@@ -11,11 +14,14 @@ const ShopItem = (props) => {
     itemName,
     itemDescription,
     itemPrice,
-    addCartAction
+    addCartAction,
   } = props;
 
-  const onCartAdd = (itemId, itemName, itemDescription, itemPrice, itemImage) => {
+  const onCartAdd = async (itemId, itemName, itemDescription, itemPrice, itemImage) => {
     addCartAction(itemId, itemName, itemDescription, itemPrice, itemImage);
+    toast.success("Added To Cart", {
+      position: toast.POSITION.BOTTOM_RIGHT
+    });
   };
 
   return (

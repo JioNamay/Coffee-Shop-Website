@@ -34,11 +34,13 @@ CREATE TABLE orders
     buyer UUID NOT NULL,
     item VARCHAR(256) NOT NULL,
     dateOrdered DATE NOT NULL,
-    archived BOOLEAN DEFAULT FALSE
-    CONSTRAINT buyer_ref FOREIGN KEY (buyer) RqEFERENCES users(userID),
+    archived BOOLEAN DEFAULT FALSE,
+    CONSTRAINT buyer_ref FOREIGN KEY (buyer) REFERENCES users(userID),
     CONSTRAINT item_ref FOREIGN KEY (item) REFERENCES items(itemId),
     PRIMARY KEY (orderItemId)
 );
+
+SELECT * FROM orders NATURAL JOIN users INNER JOIN items ON item=items.itemId;
 
 INSERT INTO users (userId, firstName, lastName, email, password)
 VALUES ('d73a0001-3dea-4aa7-aca6-f9cdd8ec89af', 'Bob', 'Smith', 'test@gmail.com', 'password123');

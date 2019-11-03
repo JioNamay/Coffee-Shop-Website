@@ -1,10 +1,19 @@
-import {ADD_CART_ITEM, GET_CART, GET_ITEMS, REMOVE_CART_ITEM} from "../actions/shopActions";
+import {
+  ADD_CART_ITEM,
+  ADD_ORDER,
+  GET_CART,
+  GET_ITEMS,
+  GET_ORDER_HISTORY,
+  REMOVE_CART_ITEM
+} from "../actions/shopActions";
 import {Item} from "../../models/Item";
 import {CartItemData} from "../../models/CartItemData";
+import {OrderItemData} from "../../models/OrderItemData";
 
 const initialState = {
   items: null,
-  cart: []
+  cart: [],
+  orderHistory: []
 };
 
 const shopReducer = (state = initialState, action) => {
@@ -54,6 +63,32 @@ const shopReducer = (state = initialState, action) => {
       return {
         ...state,
         cart: action.payload
+      };
+    case ADD_ORDER:
+      return {
+        ...state,
+        cart: [],
+        orderHistory: [...state.orderHistory, action.payload]
+      };
+    case GET_ORDER_HISTORY:
+      const orderHistoryItems = [];
+      const historyRes = action.payload.orderHistory;
+      for (const historyItem in historyRes) {
+        if (historyRes.hasOwnProperty(historyItem)) {
+          const orderItemId = historyRes[historyItem].orderitemid;
+          const itemId = historyRes[historyItem].itemid;
+          const date = historyRes[historyItem].dateordered.split('T')[0];
+          const name = historyRes[historyItem].name;
+          const description = historyRes[historyItem].description;
+          const price = historyRes[historyItem].price;
+          const image = historyRes[historyItem].image;
+
+          orderHistoryItems.push(new OrderItemData(orderItemId, itemId, date, name, description, price, image));
+        }
+      }
+      return {
+        ...state,
+        orderHistory: orderHistoryItems
       };
     default:
       return state;

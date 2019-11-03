@@ -67,6 +67,8 @@ router.post("/items", async (req, res) => {
     if (error)
       return res.status(400).json({ errors: error.details[0].message });
 
+    return res.json(value);
+
     const client = await pool.connect();
 
     console.log("select exists");
@@ -83,7 +85,7 @@ router.post("/items", async (req, res) => {
       });
 
     console.log("insert");
-    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}')`;
+    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
     const insertResult = await client.query(insertQuery);
 
     // retrieve the newly added product

@@ -142,9 +142,18 @@ router.put("/items/:id", async (req, res) => {
       }
     }
 
+    let test = {
+      before: value.itemId,
+      after: ""
+    };
+
     // update the product in the database
     const updateQuery = `UPDATE items SET itemId = '${value.itemId}', name = '${value.name}', description = '${value.description}', price = ${value.price}, image = '${value.image}' WHERE itemId = '${productId}'`;
     const updateResult = await db.query(updateQuery);
+
+    test.after = value.itemId;
+
+    res.json(test);
 
     product.itemId = value.itemId;
     product.name = value.name;

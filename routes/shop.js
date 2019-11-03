@@ -59,45 +59,44 @@ router.get("/items/:id", async (req, res) => {
 
 // POST a product
 router.post("/items", async (req, res) => {
-  try {
-    const result = validatePostProduct(req.body);
-    const { value } = result;
-    const { error } = result;
-    // if there was an error with the validation, send an error
-    if (error)
-      return res.status(400).json({ errors: error.details[0].message });
+  //try {
+  const result = validatePostProduct(req.body);
+  const { value } = result;
+  const { error } = result;
+  // if there was an error with the validation, send an error
+  if (error) return res.status(400).json({ errors: error.details[0].message });
 
-    return res.json(value);
+  return res.json(value);
 
-    const client = await pool.connect();
+  const client = await pool.connect();
 
-    console.log("select exists");
-    // check if an item with that itemId already exists
-    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
-    const existsResult = await db.query(existsQuery);
+  console.log("select exists");
+  // check if an item with that itemId already exists
+  const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
+  const existsResult = await db.query(existsQuery);
 
-    // if the itemId is already in use, send an error
-    const productExists = existsResult.rows[0].exists;
-    if (productExists)
-      return res.status(409).json({
-        errors:
-          "There is already an item with that itemId. itemId must be unique."
-      });
+  // if the itemId is already in use, send an error
+  const productExists = existsResult.rows[0].exists;
+  if (productExists)
+    return res.status(409).json({
+      errors:
+        "There is already an item with that itemId. itemId must be unique."
+    });
 
-    console.log("insert");
-    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
-    const insertResult = await client.query(insertQuery);
+  console.log("insert");
+  const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
+  const insertResult = await client.query(insertQuery);
 
-    // retrieve the newly added product
-    console.log("select");
-    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
-    const retrieveResult = await client.query(retrieveQuery);
-    client.release();
+  // retrieve the newly added product
+  console.log("select");
+  const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
+  const retrieveResult = await client.query(retrieveQuery);
+  client.release();
 
-    res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
-  } catch (error) {
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
-  }
+  res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
+  //} catch (error) {
+  return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  //}
 });
 
 // PUT (update) a specific product
@@ -166,35 +165,35 @@ router.put("/items/:id", async (req, res) => {
 
 // DELETE a specific product
 router.delete("/items/:id", async (req, res) => {
-  //try {
-  const productId = req.params.id;
+  try {
+    const productId = req.params.id;
 
-  // check that the product exists
-  const client = await pool.connect();
-  const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
-  const existsResult = await client.query(existsQuery);
+    // check that the product exists
+    const client = await pool.connect();
+    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
+    const existsResult = await client.query(existsQuery);
 
-  // if the product does not exist, send an error
-  const productExists = existsResult.rows[0].exists;
-  if (!productExists)
-    return res
-      .status(404)
-      .json({ errors: "The product with the given ID was not found." });
+    // if the product does not exist, send an error
+    const productExists = existsResult.rows[0].exists;
+    if (!productExists)
+      return res
+        .status(404)
+        .json({ errors: "The product with the given ID was not found." });
 
-  // product exists; get it so that we can send it as a response
-  const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
-  const retrieveResult = await client.query(retrieveQuery);
-  const product = retrieveResult.rows[0];
+    // product exists; get it so that we can send it as a response
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
+    const retrieveResult = await client.query(retrieveQuery);
+    const product = retrieveResult.rows[0];
 
-  // delete the product from the database
-  const deleteQuery = `DELETE FROM items WHERE itemId = '${productId}'`;
-  const deleteResult = await client.query(deleteQuery);
-  client.release();
+    // delete the product from the database
+    const deleteQuery = `DELETE FROM items WHERE itemId = '${productId}'`;
+    const deleteResult = await client.query(deleteQuery);
+    client.release();
 
-  res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response
-  //} catch (error) {
-  //return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
-  //}
+    res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response
+  } catch (error) {
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  }
 });
 
 async function verifyToken(token) {

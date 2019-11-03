@@ -5,7 +5,7 @@ const Joi = require("@hapi/joi"); // joi validation tool
 
 const router = express.Router();
 
-const secrets = require("../secrets");
+const secrets = require('../secrets');
 //const secrets = undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
@@ -33,7 +33,10 @@ router.get("/", async (req, res) => {
 // GET a specific product
 router.get("/:id", async (req, res) => {
   try {
-    const productId = req.params.id;
+    // if the id is not a number, send an error
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId))
+      return res.status(400).json({ errors: "The ID must be a number." });
 
     // check that the product exists
     const db = await pool.connect();
@@ -68,11 +71,12 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ errors: error.details[0].message });
 
     const client = await pool.connect();
-    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}')`;
+    const insertQuery = `INSERT INTO items (name, description, price, image) VALUES ('${value.name}', '${value.description}', '${value.price}', '${value.image}'); SELECT currval('items_itemId_seq')`;
     const insertResult = await client.query(insertQuery);
 
     // retrieve the newly added product
-    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
+    const productId = insertResult[1].rows[0].currval;
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
     const retrieveResult = await client.query(retrieveQuery);
     client.release();
 
@@ -85,7 +89,10 @@ router.post("/", async (req, res) => {
 // PUT (update) a specific product
 router.put("/:id", async (req, res) => {
   try {
-    const productId = req.params.id;
+    // if the id is not a number, send an error
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId))
+      return res.status(400).json({ errors: "The ID must be a number." });
 
     // check that the product exists
     const client = await pool.connect();
@@ -112,10 +119,9 @@ router.put("/:id", async (req, res) => {
       return res.status(400).json({ errors: error.details[0].message });
 
     // update the product in the database
-    const updateQuery = `UPDATE items SET itemId = ${value.itemId}, name = ${value.name}, description = ${value.description}, price = ${value.price}, image = ${value.image} WHERE itemId = '${productId}'`;
+    const updateQuery = `UPDATE items SET name = ${value.name}, description = ${value.description}, price = ${value.price}, image = ${value.image} WHERE itemId = '${productId}'`;
     const updateResult = await client.query(updateQuery);
 
-    product.itemId = value.itemId;
     product.name = value.name;
     product.description = value.description;
     product.price = value.price;
@@ -131,7 +137,10 @@ router.put("/:id", async (req, res) => {
 // DELETE a specific product
 router.delete("/:id", async (req, res) => {
   try {
-    const productId = req.params.id;
+    // if the id is not a number, send an error
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId))
+      return res.status(400).json({ errors: "The ID must be a number." });
 
     // check that the product exists
     const client = await pool.connect();
@@ -231,19 +240,21 @@ router.delete("/cart/:cart_item_id", async (req, res) => {
     db.release();
     return res.status(200);
   } catch (error) {
-    if (error.message === "INVALID_TOKEN") {
-      return res.status(403).json({ errors: "INVALID_TOKEN" });
+    if (error.message === 'INVALID_TOKEN') {
+      return res.status(403).json({ errors: 'INVALID_TOKEN' });
     }
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
   }
 });
 
-router.post("/cart/order", async (req, res) => {
+router.post('/cart/order', async (req, res) => {
   try {
-    const { orders } = req.body;
+    const {
+      orders
+    } = req.body;
 
     // Verify token
-    const token = req.headers["authorization"];
+    const token = req.headers['authorization'];
     const userId = await verifyToken(token);
 
     const db = await pool.connect();
@@ -261,33 +272,34 @@ router.post("/cart/order", async (req, res) => {
     await db.query(deleteCartQuery);
 
     db.release();
-    return res.status(201).send("Cart Ordered");
+    return res.status(201).send('Cart Ordered');
   } catch (error) {
-    if (error.message === "INVALID_TOKEN") {
-      return res.status(403).json({ errors: "INVALID_TOKEN" });
+    if (error.message === 'INVALID_TOKEN') {
+      return res.status(403).json({ errors: 'INVALID_TOKEN' });
     }
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
   }
 });
 
-router.get("/orders", async (req, res) => {
+router.get('/orders', async (req, res) => {
   try {
     // Verify token
-    const token = req.headers["authorization"];
+    const token = req.headers['authorization'];
     const userId = await verifyToken(token);
 
     const db = await pool.connect();
     const orderHistoryQuery = `SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders NATURAL JOIN users INNER JOIN items ON item=items.itemId WHERE buyer='${userId}' AND archived='f';`;
     const orderHistory = await db.query(orderHistoryQuery);
-    const orderHistoryResults = orderHistory ? orderHistory.rows : null;
+    const orderHistoryResults = (orderHistory) ? orderHistory.rows : null;
 
     db.release();
-    return res.status(200).json({ orderHistory: orderHistoryResults });
+    return res.status(200).json({'orderHistory': orderHistoryResults});
+
   } catch (error) {
-    if (error.message === "INVALID_TOKEN") {
-      return res.status(403).json({ errors: "INVALID_TOKEN" });
+    if (error.message === 'INVALID_TOKEN') {
+      return res.status(403).json({ errors: 'INVALID_TOKEN' });
     }
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
   }
 });
 
@@ -298,9 +310,6 @@ router.get("/orders", async (req, res) => {
  */
 function validatePostProduct(product) {
   const schema = {
-    itemId: Joi.string()
-      .min(1) // minimum 1 character required
-      .required(), // itemId is mandatory
     name: Joi.string()
       .min(1) // minimum 1 character required
       .required(), // name is mandatory
@@ -330,9 +339,6 @@ function validatePostProduct(product) {
  */
 function validatePutProduct(oldProduct, newProduct) {
   const schema = {
-    itemId: Joi.string()
-      .min(1) // minimum 1 character required
-      .default(oldProduct.itemId), // if undefined, do not change the itemId
     name: Joi.string()
       .min(1) // minimum 1 character required
       .default(oldProduct.name), // if undefined, do not change the name

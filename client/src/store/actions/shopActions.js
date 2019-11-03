@@ -1,13 +1,13 @@
-import axios from 'axios'
+import axios from "axios";
 import uuid from "uuid";
-import {CartItemData} from "../../models/CartItemData";
+
+import { CartItemData } from "../../models/CartItemData";
 import {OrderItemData} from "../../models/OrderItemData";
 
-export const GET_ITEMS = 'GET_ITEMS';
-
-export const GET_CART = 'GET_CART';
-export const ADD_CART_ITEM = 'ADD_CART_ITEM';
-export const REMOVE_CART_ITEM = 'REMOVE_CART_ITEM';
+export const GET_ITEMS = "GET_ITEMS";
+export const GET_CART = "GET_CART";
+export const ADD_CART_ITEM = "ADD_CART_ITEM";
+export const REMOVE_CART_ITEM = "REMOVE_CART_ITEM";
 
 export const ADD_ORDER = 'ADD_ORDER';
 export const GET_ORDER_HISTORY = 'GET_ORDERS';
@@ -15,23 +15,21 @@ export const REMOVE_ORDER_HISTORY_ITEM = 'REMOVE_ORDER_HISTORY_ITEM';
 
 const config = {
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json"
   }
 };
 
 export const getItemsAction = () => {
   return async dispatch => {
     try {
-      const getItemsRequest = await axios.get('/api/shop/all', config);
+      const getItemsRequest = await axios.get("/api/shop", config);
 
       dispatch({
         type: GET_ITEMS,
         payload: getItemsRequest.data
       });
-    } catch (error) {
-
-    }
-  }
+    } catch (error) {}
+  };
 };
 
 export const getCartAction = () => {
@@ -40,23 +38,30 @@ export const getCartAction = () => {
       const user = getState().user.user;
       const tokenConfig = {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${user.token}`
+          "Content-Type": "application/json",
+          Authorization: `${user.token}`
         }
       };
-      const getCartRequest = await axios.get('/api/shop/cart', tokenConfig);
+      console.log('GHERE');
+      const getCartRequest = await axios.get("/api/shop/cart", tokenConfig);
 
       dispatch({
         type: GET_CART,
         payload: getCartRequest.data
-      })
+      });
     } catch (error) {
       throw new Error(error.response.data.errors);
     }
-  }
+  };
 };
 
-export const addCartAction = (itemId, itemName, itemDescription, itemPrice, itemImage) => {
+export const addCartAction = (
+  itemId,
+  itemName,
+  itemDescription,
+  itemPrice,
+  itemImage
+) => {
   return async (dispatch, getState) => {
     try {
       // Get state
@@ -65,40 +70,52 @@ export const addCartAction = (itemId, itemName, itemDescription, itemPrice, item
 
       // Add to cart
       const cartItemId = uuid.v4();
-      currentCart.push(new CartItemData(cartItemId, itemId, itemName, itemDescription, itemPrice, itemImage));
+      currentCart.push(
+        new CartItemData(
+          cartItemId,
+          itemId,
+          itemName,
+          itemDescription,
+          itemPrice,
+          itemImage
+        )
+      );
 
       // Prepare request to sync with database
       const tokenConfig = {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${user.token}`
+          "Content-Type": "application/json",
+          Authorization: `${user.token}`
         }
       };
-      const body = JSON.stringify({cartItemId: cartItemId, itemId: itemId});
-      await axios.post('/api/shop/cart', body, tokenConfig);
+      const body = JSON.stringify({ cartItemId: cartItemId, itemId: itemId });
+      await axios.post("/api/shop/cart", body, tokenConfig);
 
       dispatch({
         type: ADD_CART_ITEM,
         payload: currentCart
       });
+
     } catch (error) {
 
     }
   }
 };
 
-export const removeCartAction = (cartItemId) => {
+export const removeCartAction = cartItemId => {
   return async (dispatch, getState) => {
     try {
       // Get state and remove from cart
       const user = getState().user.user;
-      const filteredCart = [...getState().shop.cart].filter(cartItem => cartItem.cartItemId !== cartItemId);
+      const filteredCart = [...getState().shop.cart].filter(
+        cartItem => cartItem.cartItemId !== cartItemId
+      );
 
       // Prepare request to sync delete with database
       const tokenConfig = {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${user.token}`
+          "Content-Type": "application/json",
+          Authorization: `${user.token}`
         }
       };
       axios.delete(`/api/shop/cart/${cartItemId}`, tokenConfig);
@@ -107,10 +124,8 @@ export const removeCartAction = (cartItemId) => {
         type: REMOVE_CART_ITEM,
         payload: filteredCart
       });
-    } catch (error) {
-
-    }
-  }
+    } catch (error) {}
+  };
 };
 
 export const orderCartAction = () => {

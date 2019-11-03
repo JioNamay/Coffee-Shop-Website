@@ -15,7 +15,7 @@ const pool = new Pool({
   ssl: false
 });
 
-router.get("/", async (req, res) => {
+router.get("/items", async (req, res) => {
   try {
     const db = await pool.connect();
     const allItemsQuery = `SELECT * FROM items;`;

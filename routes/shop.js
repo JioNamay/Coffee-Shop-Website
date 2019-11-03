@@ -124,6 +124,8 @@ router.put("/items/:id", async (req, res) => {
     if (error)
       return res.status(400).json({ errors: error.details[0].message });
 
+    return res.json({ mariah: value.itemId });
+
     // if itemId is defined in body JSON
     if (req.body.hasOwnProperty("itemId")) {
       // if they want to change the itemId of the existing item to something else
@@ -142,7 +144,6 @@ router.put("/items/:id", async (req, res) => {
       }
     }
 
-    return res.send(value.itemId);
     // update the product in the database
     const updateQuery = `UPDATE items SET itemId = '${value.itemId}', name = '${value.name}', description = '${value.description}', price = ${value.price}, image = '${value.image}' WHERE itemId = '${productId}'`;
     const updateResult = await db.query(updateQuery);

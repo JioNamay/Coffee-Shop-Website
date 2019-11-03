@@ -124,8 +124,6 @@ router.put("/items/:id", async (req, res) => {
     if (error)
       return res.status(400).json({ errors: error.details[0].message });
 
-    return res.json(product.itemid);
-
     // if itemId is defined in body JSON
     if (req.body.hasOwnProperty("itemId")) {
       // if they want to change the itemId of the existing item to something else
@@ -368,7 +366,7 @@ function validatePutProduct(oldProduct, newProduct) {
   const schema = {
     itemId: Joi.string()
       .min(1) // minimum 1 character required
-      .default(oldProduct.itemId), // if undefined, do not change the itemId
+      .default(oldProduct.itemid), // if undefined, do not change the itemId
     name: Joi.string()
       .min(1) // minimum 1 character required
       .default(oldProduct.name), // if undefined, do not change the name

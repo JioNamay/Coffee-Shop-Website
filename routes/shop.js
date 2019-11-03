@@ -187,7 +187,7 @@ router.get("/cart", async (req, res) => {
     const userId = await verifyToken(token);
 
     const db = await pool.connect();
-    const cartQuery = `SELECT cartitemid, itemid, name, description, price, image FROM cart NATURAL JOIN users INNER JOIN items ON item=items.itemid WHERE buyer='${userId}';`;
+    const cartQuery = `SELECT cartitemid, itemid, name, description, price, image FROM cart INNER JOIN users ON cart.buyer=users.userid INNER JOIN items ON item=items.itemid WHERE buyer='${userId}';`;
     const cart = await db.query(cartQuery);
     const cartResults = cart ? cart.rows : null;
 
@@ -292,7 +292,7 @@ router.get('/orders', async (req, res) => {
 
     // Get order history
     const db = await pool.connect();
-    const orderHistoryQuery = `SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders NATURAL JOIN users INNER JOIN items ON item=items.itemId WHERE buyer='${userId}' AND archived='f';`;
+    const orderHistoryQuery = `SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders INNER JOIN users ON orders.buyer=users.userid INNER JOIN items ON item=items.itemId WHERE buyer='${userId}' AND archived='f';`;
     const orderHistory = await db.query(orderHistoryQuery);
     const orderHistoryResults = (orderHistory) ? orderHistory.rows : null;
 

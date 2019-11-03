@@ -88,7 +88,7 @@ export const addCartAction = (
         }
       };
       const body = JSON.stringify({ cartItemId: cartItemId, itemId: itemId });
-      await axios.post("/api/shop/cart", body, tokenConfig);
+      axios.post("/api/shop/cart", body, tokenConfig);
 
       dispatch({
         type: ADD_CART_ITEM,

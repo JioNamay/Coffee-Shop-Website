@@ -67,6 +67,7 @@ export const tokenLoginAction = (token) => {
     try {
       const body = JSON.stringify({token});
       const tokenLoginRequest = await axios.post('/api/user/tokenlogin', body, config);
+
       dispatch({
         type: TOKEN_LOGIN,
         payload: tokenLoginRequest.data,
@@ -83,6 +84,7 @@ export const resetPasswordAction = (email) => {
     try {
       const body = JSON.stringify({email});
       axios.post('/api/user/identify', body, config);
+
       dispatch({
         type: RESET_EMAIL
       });

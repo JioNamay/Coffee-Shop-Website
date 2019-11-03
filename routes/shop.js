@@ -124,7 +124,7 @@ router.put("/items/:id", async (req, res) => {
     if (error)
       return res.status(400).json({ errors: error.details[0].message });
 
-    return res.json(product);
+    return res.json(value);
 
     // if itemId is defined in body JSON
     if (req.body.hasOwnProperty("itemId")) {
@@ -368,7 +368,7 @@ function validatePutProduct(oldProduct, newProduct) {
   const schema = {
     itemId: Joi.string()
       .min(1) // minimum 1 character required
-      .default(oldProduct.itemId), // if undefined, do not change the itemId
+      .default("mariah"), // if undefined, do not change the itemId
     name: Joi.string()
       .min(1) // minimum 1 character required
       .default(oldProduct.name), // if undefined, do not change the name

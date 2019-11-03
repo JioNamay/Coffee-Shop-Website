@@ -153,7 +153,7 @@ router.put("/items/:id", async (req, res) => {
 
     test.after = value.itemId;
 
-    res.json(test);
+    return res.json(test);
 
     product.itemId = value.itemId;
     product.name = value.name;

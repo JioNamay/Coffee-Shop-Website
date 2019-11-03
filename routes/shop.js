@@ -1,7 +1,7 @@
 const express = require("express");
 const { Pool } = require("pg");
 const jwt = require("jsonwebtoken");
-const Joi = require("@hapi/joi"); // joi validation tool
+const Joi = require("@hapi/joi"); // Joi validation tool
 
 const router = express.Router();
 

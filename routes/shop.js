@@ -5,7 +5,8 @@ const Joi = require("@hapi/joi"); // joi validation tool
 
 const router = express.Router();
 
-const secrets = (process.env.NODE_ENV !== 'production') ? require("../secrets") : undefined;
+const secrets =
+  process.env.NODE_ENV !== "production" ? require("../secrets") : undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
 
@@ -68,6 +69,7 @@ router.post("/items", async (req, res) => {
 
     const client = await pool.connect();
 
+    console.log("select exists");
     // check if an item with that itemId already exists
     const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
     const existsResult = await db.query(existsQuery);
@@ -80,10 +82,12 @@ router.post("/items", async (req, res) => {
           "There is already an item with that itemId. itemId must be unique."
       });
 
+    console.log("insert");
     const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}')`;
     const insertResult = await client.query(insertQuery);
 
     // retrieve the newly added product
+    console.log("select");
     const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
     const retrieveResult = await client.query(retrieveQuery);
     client.release();

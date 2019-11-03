@@ -73,15 +73,13 @@ router.post("/", async (req, res) => {
     const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
     const existsResult = await db.query(existsQuery);
 
-    // if the itemId is not unique, send an error
+    // if the itemId is already in use, send an error
     const productExists = existsResult.rows[0].exists;
     if (productExists)
-      return res
-        .status(409)
-        .json({
-          errors:
-            "There is already an item with that itemId. itemId must be unique."
-        });
+      return res.status(409).json({
+        errors:
+          "There is already an item with that itemId. itemId must be unique."
+      });
 
     const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}')`;
     const insertResult = await client.query(insertQuery);
@@ -125,6 +123,24 @@ router.put("/:id", async (req, res) => {
     // if there was an error with the validation, send an error
     if (error)
       return res.status(400).json({ errors: error.details[0].message });
+
+    // if itemId is defined in body JSON
+    if (req.body.hasOwnProperty("itemId")) {
+      // if they want to change the itemId of the existing item to something else
+      if (req.body.itemId != productId) {
+        // check if itemId they want to use is already in use
+        const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${req.body.itemId}')`;
+        const existsResult = await db.query(existsQuery);
+
+        // if the itemId is already in use, send an error
+        const productExists = existsResult.rows[0].exists;
+        if (productExists)
+          return res.status(409).json({
+            errors:
+              "There is already an item with that itemId. itemId must be unique."
+          });
+      }
+    }
 
     // update the product in the database
     const updateQuery = `UPDATE items SET itemId = ${value.itemId}, name = ${value.name}, description = ${value.description}, price = ${value.price}, image = ${value.image} WHERE itemId = '${productId}'`;

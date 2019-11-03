@@ -368,7 +368,7 @@ function validatePutProduct(oldProduct, newProduct) {
   const schema = {
     itemId: Joi.string()
       .min(1) // minimum 1 character required
-      .default("mariah"), // if undefined, do not change the itemId
+      .default(oldProduct.itemId), // if undefined, do not change the itemId
     name: Joi.string()
       .min(1) // minimum 1 character required
       .default(oldProduct.name), // if undefined, do not change the name

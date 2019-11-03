@@ -47,7 +47,7 @@ const App = () => {
             <Route exact path="/cart" component={Cart} />
             <Route exact path="/history" component={OrderHistory} />
             <Route exact path="/login/identify" component={Identify} />
-            <Route path="/login/verifyreset" component={VerifyReset} />
+            <Route exact path="/login/verifyreset/:token" component={VerifyReset} />
           </Switch>
         </Fragment>
       </Router>

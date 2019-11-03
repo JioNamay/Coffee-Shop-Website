@@ -8,8 +8,7 @@ const nodemailer = require('nodemailer');
 
 const router = express.Router();
 
-//const secrets = require('../secrets');
-const secrets = undefined;
+const secrets = (process.env.NODE_ENV !== 'production') ? require("../secrets") : undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
 const emailRecovery = process.env.EMAIL_RECOVERY || secrets.emailRecovery;

@@ -5,8 +5,7 @@ const Joi = require("@hapi/joi"); // joi validation tool
 
 const router = express.Router();
 
-//const secrets = require("../secrets");
-const secrets = undefined;
+const secrets = (process.env.NODE_ENV !== 'production') ? require("../secrets") : undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
 

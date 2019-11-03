@@ -124,7 +124,7 @@ router.put("/items/:id", async (req, res) => {
     if (error)
       return res.status(400).json({ errors: error.details[0].message });
 
-    return res.json(product.itemId);
+    return res.json(product.itemid);
 
     // if itemId is defined in body JSON
     if (req.body.hasOwnProperty("itemId")) {

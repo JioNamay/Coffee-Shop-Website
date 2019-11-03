@@ -8,8 +8,8 @@ const nodemailer = require('nodemailer');
 
 const router = express.Router();
 
-const secrets = require('../secrets');
-//const secrets = undefined;
+//const secrets = require('../secrets');
+const secrets = undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
 const emailRecovery = process.env.EMAIL_RECOVERY || secrets.emailRecovery;
@@ -21,37 +21,37 @@ const pool = new Pool({
   ssl: false
 });
 
-
 router.post(
-  '/signup',
+  "/signup",
   [
-    check('firstName', 'First name must not be empty').not().isEmpty(),
-    check('lastName', 'Last name must not be empty').not().isEmpty(),
-    check('email', 'Email required').isEmail(),
-    check('password', 'Password must be at least 5 characters').isLength({ min: 5 })
+    check("firstName", "First name must not be empty")
+      .not()
+      .isEmpty(),
+    check("lastName", "Last name must not be empty")
+      .not()
+      .isEmpty(),
+    check("email", "Email required").isEmail(),
+    check("password", "Password must be at least 5 characters").isLength({
+      min: 5
+    })
   ],
   async (req, res) => {
     try {
       // Check for errors in request
-      if(!validationResult(req).isEmpty()) {
+      if (!validationResult(req).isEmpty()) {
         // Outputting errors
         return res.status(400).json({ errors: validationResult(req).array() });
       }
 
-      const {
-        firstName,
-        lastName,
-        email,
-        password
-      } = req.body;
+      const { firstName, lastName, email, password } = req.body;
 
       // Check if user already exists
       const db = await pool.connect();
       const checkExistsQuery = `SELECT * FROM users WHERE email='${email}';`;
       const checkExists = await db.query(checkExistsQuery);
-      const result = (checkExists) ? checkExists.rows : null;
+      const result = checkExists ? checkExists.rows : null;
       if (result.length > 0) {
-        return res.status(400).json({ errors: 'EMAIL_EXISTS' });
+        return res.status(400).json({ errors: "EMAIL_EXISTS" });
       }
 
       // Create the user
@@ -65,46 +65,45 @@ router.post(
       await db.query(insertUserQuery);
 
       db.release();
-      return res.status(201).send('User created');
+      return res.status(201).send("User created");
     } catch (error) {
-      return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+      return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
     }
   }
 );
 
 router.post(
-  '/login',
+  "/login",
   [
-    check('email', 'Email required').isEmail(),
-    check('password', 'Password required').not().isEmpty()
+    check("email", "Email required").isEmail(),
+    check("password", "Password required")
+      .not()
+      .isEmpty()
   ],
   async (req, res) => {
     try {
       // Check for errors in request
-      if(!validationResult(req).isEmpty()) {
+      if (!validationResult(req).isEmpty()) {
         // Outputting errors
         return res.status(400).json({ errors: validationResult(req).array() });
       }
 
-      const {
-        email,
-        password
-      } = req.body;
+      const { email, password } = req.body;
 
       // Check for valid email
       const db = await pool.connect();
       const validEmailQuery = `SELECT * FROM users WHERE email='${email}';`;
       const validEmail = await db.query(validEmailQuery);
-      const result = (validEmail) ? validEmail.rows : null;
+      const result = validEmail ? validEmail.rows : null;
       if (result.length === 0) {
-        return res.status(400).send({ errors: 'INVALID_LOGIN' });
+        return res.status(400).send({ errors: "INVALID_LOGIN" });
       }
 
       // Check for valid password
       const passwordResult = result[0].password;
       const passwordMatches = await bcrypt.compare(password, passwordResult);
       if (!passwordMatches) {
-        return res.status(400).json({ errors: 'INVALID_LOGIN' });
+        return res.status(400).json({ errors: "INVALID_LOGIN" });
       }
 
       // Successful login
@@ -120,7 +119,7 @@ router.post(
         },
         tokenKey,
         {
-          expiresIn: '5h'
+          expiresIn: "5h"
         },
         (error, token) => {
           return res.status(200).json({
@@ -132,22 +131,19 @@ router.post(
           });
         }
       );
-
     } catch (error) {
-      return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+      return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
     }
   }
 );
 
-router.post('/tokenlogin', async (req, res) => {
+router.post("/tokenlogin", async (req, res) => {
   try {
-    const {
-      token
-    } = req.body;
+    const { token } = req.body;
 
     jwt.verify(token, tokenKey, (error, tokenData) => {
       if (error) {
-        return res.status(403).json({ errors: 'INVALID_TOKEN' });
+        return res.status(403).json({ errors: "INVALID_TOKEN" });
       } else {
         return res.status(200).json({
           userId: tokenData.userData.userId,
@@ -156,10 +152,9 @@ router.post('/tokenlogin', async (req, res) => {
           email: tokenData.userData.email
         });
       }
-    })
-
+    });
   } catch (error) {
-    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 

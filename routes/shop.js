@@ -81,7 +81,7 @@ router.post("/items", async (req, res) => {
           "There is already an item with that itemId. itemId must be unique."
       });
 
-    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', '${value.price}', '${value.image}');`;
+    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', ${value.price}, '${value.image}');`;
     const insertResult = await db.query(insertQuery);
 
     // retrieve the newly added product
@@ -143,7 +143,7 @@ router.put("/items/:id", async (req, res) => {
     }
 
     // update the product in the database
-    const updateQuery = `UPDATE items SET itemId = ${value.itemId}, name = ${value.name}, description = ${value.description}, price = ${value.price}, image = ${value.image} WHERE itemId = '${productId}'`;
+    const updateQuery = `UPDATE items SET itemId = '${value.itemId}', name = '${value.name}', description = '${value.description}', price = ${value.price}, image = '${value.image}' WHERE itemId = '${productId}'`;
     const updateResult = await db.query(updateQuery);
 
     product.itemId = value.itemId;

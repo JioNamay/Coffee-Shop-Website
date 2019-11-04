@@ -278,8 +278,8 @@ router.delete("/cart/:cart_item_id", async (req, res) => {
 
     // Delete the item from the cart table
     const db = await pool.connect();
-    const deleteCartQuery = `DELETE from cart where cartitemid='${cartItemId}';`;
-    await db.query(deleteCartQuery);
+    const deleteCartQuery = "DELETE from cart where cartitemid=$1;";
+    await db.query(deleteCartQuery, [cartItemId]);
 
     db.release();
     return res.status(200);

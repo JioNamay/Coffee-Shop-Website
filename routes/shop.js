@@ -306,8 +306,9 @@ router.post("/cart/order", async (req, res) => {
         const orderItemId = orders[order].orderItemId;
         const itemId = orders[order].itemId;
         const date = orders[order].date;
-        const insertOrderQuery = `INSERT INTO orders (orderItemId, buyer, item, dateOrdered) VALUES ('${orderItemId}', '${userId}', '${itemId}', '${date}');`;
-        await db.query(insertOrderQuery);
+        const insertOrderQuery =
+          "INSERT INTO orders (orderItemId, buyer, item, dateOrdered) VALUES ($1, $2, $3, $4);";
+        await db.query(insertOrderQuery, [orderItemId, userId, itemId, date]);
       }
     }
 

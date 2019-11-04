@@ -70,8 +70,9 @@ router.post("/items", async (req, res) => {
     const db = await pool.connect();
 
     // check if an item with that itemId already exists
-    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${value.itemId}')`;
-    const existsResult = await db.query(existsQuery);
+    const existsQuery =
+      "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+    const existsResult = await db.query(existsQuery, [value.itemId]);
 
     // if the itemId is already in use, send an error
     const productExists = existsResult.rows[0].exists;
@@ -81,12 +82,19 @@ router.post("/items", async (req, res) => {
           "There is already an item with that itemId. itemId must be unique."
       });
 
-    const insertQuery = `INSERT INTO items (itemId, name, description, price, image) VALUES ('${value.itemId}', '${value.name}', '${value.description}', ${value.price}, '${value.image}');`;
-    const insertResult = await db.query(insertQuery);
+    const insertQuery =
+      "INSERT INTO items (itemId, name, description, price, image) VALUES ($1, $2, $3, $4, $5);";
+    const insertResult = await db.query(insertQuery, [
+      value.itemId,
+      value.name,
+      value.description,
+      value.price,
+      value.image
+    ]);
 
     // retrieve the newly added product
-    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${value.itemId}'`;
-    const retrieveResult = await db.query(retrieveQuery);
+    const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
+    const retrieveResult = await db.query(retrieveQuery, [value.itemId]);
     db.release();
 
     res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response

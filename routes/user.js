@@ -1,18 +1,20 @@
-const express = require('express');
-const { check, validationResult} = require('express-validator');
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
-const uuid = require('uuid');
-const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const express = require("express");
+const { check, validationResult } = require("express-validator");
+const { Pool } = require("pg");
+const bcrypt = require("bcryptjs");
+const uuid = require("uuid");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const router = express.Router();
 
-const secrets = (process.env.NODE_ENV !== 'production') ? require("../secrets") : undefined;
+const secrets =
+  process.env.NODE_ENV !== "production" ? require("../secrets") : undefined;
 const databaseConnectionString = process.env.DATABASE_URL || secrets.database;
 const tokenKey = process.env.TOKEN_KEY || secrets.tokenKey;
 const emailRecovery = process.env.EMAIL_RECOVERY || secrets.emailRecovery;
-const passwordRecovery = process.env.PASSWORD_RECOVERY || secrets.passwordRecovery;
+const passwordRecovery =
+  process.env.PASSWORD_RECOVERY || secrets.passwordRecovery;
 const resetUrl = process.env.WEBSITE_URL || secrets.resetUrl;
 
 const pool = new Pool({
@@ -46,8 +48,8 @@ router.post(
 
       // Check if user already exists
       const db = await pool.connect();
-      const checkExistsQuery = `SELECT * FROM users WHERE email='${email}';`;
-      const checkExists = await db.query(checkExistsQuery);
+      const checkExistsQuery = "SELECT * FROM users WHERE email=$1;";
+      const checkExists = await db.query(checkExistsQuery, [email]);
       const result = checkExists ? checkExists.rows : null;
       if (result.length > 0) {
         return res.status(400).json({ errors: "EMAIL_EXISTS" });
@@ -59,9 +61,14 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const insertUserQuery =
-        `INSERT INTO users(userId, firstName, lastName, email, password) ` +
-        `VALUES ('${userId}', '${firstName}', '${lastName}', '${email}', '${hashedPassword}');`;
-      await db.query(insertUserQuery);
+        "INSERT INTO users(userId, firstName, lastName, email, password) VALUES ($1, $2, $3, $4, $5);";
+      await db.query(insertUserQuery, [
+        userId,
+        firstName,
+        lastName,
+        email,
+        hashedPassword
+      ]);
 
       db.release();
       return res.status(201).send("User created");
@@ -157,17 +164,15 @@ router.post("/tokenlogin", async (req, res) => {
   }
 });
 
-router.post('/identify', async (req, res) => {
+router.post("/identify", async (req, res) => {
   try {
-    const {
-      email
-    } = req.body;
+    const { email } = req.body;
 
     // Check if email actually exists
     const db = await pool.connect();
     const emailExistsQuery = `SELECT * FROM users WHERE email='${email}';`;
     const emailExists = await db.query(emailExistsQuery);
-    const existsResult = (emailExists) ? emailExists.rows : null;
+    const existsResult = emailExists ? emailExists.rows : null;
     if (existsResult.length === 0) {
       return;
     }
@@ -181,12 +186,12 @@ router.post('/identify', async (req, res) => {
       },
       tokenKey,
       {
-        expiresIn: '1h'
+        expiresIn: "1h"
       },
       (error, token) => {
         // Once token is created, send an email
         const transporter = nodemailer.createTransport({
-          service: 'gmail',
+          service: "gmail",
           auth: {
             user: emailRecovery,
             pass: passwordRecovery
@@ -196,7 +201,7 @@ router.post('/identify', async (req, res) => {
         const mailOptions = {
           from: emailRecovery,
           to: email,
-          subject: 'Aroma Coffee Password Reset',
+          subject: "Aroma Coffee Password Reset",
           html: `Click this link to reset your password: <a href='${resetUrl}/${token}'>Click Here</a>`
         };
 
@@ -205,7 +210,7 @@ router.post('/identify', async (req, res) => {
 
         // Check if user already has done a reset. If they did, edit their token
         const checkResetQuery = `SELECT * FROM resettokens WHERE email='${email}';`;
-        db.query(checkResetQuery).then((checkResetResult) => {
+        db.query(checkResetQuery).then(checkResetResult => {
           const hasEntry = checkResetResult.rows.length !== 0;
           if (hasEntry) {
             // Edit the token to the newest one, making all others invalid
@@ -222,16 +227,16 @@ router.post('/identify', async (req, res) => {
       }
     );
     db.release();
-    return res.status(200).json({ message: 'Reset email sent' });
+    return res.status(200).json({ message: "Reset email sent" });
   } catch (error) {
-    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 
 async function verifyResetToken(token) {
   return await jwt.verify(token, tokenKey, (error, tokenData) => {
     if (error) {
-      throw new Error('INVALID_TOKEN');
+      throw new Error("INVALID_TOKEN");
     } else {
       // Check if table of tokens has this email instance
       return tokenData.emailData.email;
@@ -242,12 +247,9 @@ async function verifyResetToken(token) {
 /**
  * This route actually does the password reset
  */
-router.post('/passwordreset', async (req, res) => {
+router.post("/passwordreset", async (req, res) => {
   try {
-    const {
-      token,
-      password
-    } = req.body;
+    const { token, password } = req.body;
 
     // Verify token
     const email = await verifyResetToken(token);
@@ -256,15 +258,15 @@ router.post('/passwordreset', async (req, res) => {
     const db = await pool.connect();
     const checkResetExistsQuery = `SELECT * FROM resettokens WHERE email='${email}';`;
     const checkResetExists = await db.query(checkResetExistsQuery);
-    const checkResetResult = (checkResetExists) ? checkResetExists.rows : null;
+    const checkResetResult = checkResetExists ? checkResetExists.rows : null;
     if (checkResetResult.length === 0) {
-      return res.status(400).json({ errors: 'INVALID_REQUEST' });
+      return res.status(400).json({ errors: "INVALID_REQUEST" });
     }
 
     // Check for the same token
     const tableToken = checkResetResult[0].token;
     if (tableToken !== token) {
-      return res.status(403).json({ errors: 'INVALID_TOKEN' });
+      return res.status(403).json({ errors: "INVALID_TOKEN" });
     }
 
     // Now that the tokens are equal, reset the password
@@ -277,13 +279,13 @@ router.post('/passwordreset', async (req, res) => {
     await db.query(deleteResetTokensEntryQuery);
 
     db.release();
-    return res.status(200).json({ message: 'PASSWORD_RESET' });
+    return res.status(200).json({ message: "PASSWORD_RESET" });
   } catch (error) {
-    if (error.message === 'INVALID_TOKEN') {
+    if (error.message === "INVALID_TOKEN") {
       // If token is invalid then delete
-      return res.status(403).json({ errors: 'INVALID_TOKEN' });
+      return res.status(403).json({ errors: "INVALID_TOKEN" });
     }
-    return res.status(500).json({ errors: 'INTERNAL_SERVER_ERROR' });
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }
 });
 

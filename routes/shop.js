@@ -313,8 +313,8 @@ router.post("/cart/order", async (req, res) => {
     }
 
     // Delete cart data
-    const deleteCartQuery = `DELETE FROM cart WHERE buyer='${userId}';`;
-    await db.query(deleteCartQuery);
+    const deleteCartQuery = "DELETE FROM cart WHERE buyer=$1;";
+    await db.query(deleteCartQuery, [userId]);
 
     db.release();
     return res.status(201).send("Cart Ordered");

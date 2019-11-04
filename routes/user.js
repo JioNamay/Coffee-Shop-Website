@@ -258,8 +258,8 @@ router.post("/passwordreset", async (req, res) => {
 
     // Check if this user is actually in the reset table
     const db = await pool.connect();
-    const checkResetExistsQuery = `SELECT * FROM resettokens WHERE email='${email}';`;
-    const checkResetExists = await db.query(checkResetExistsQuery);
+    const checkResetExistsQuery = "SELECT * FROM resettokens WHERE email=$1;";
+    const checkResetExists = await db.query(checkResetExistsQuery, [email]);
     const checkResetResult = checkResetExists ? checkResetExists.rows : null;
     if (checkResetResult.length === 0) {
       return res.status(400).json({ errors: "INVALID_REQUEST" });
@@ -274,11 +274,12 @@ router.post("/passwordreset", async (req, res) => {
     // Now that the tokens are equal, reset the password
     const salt = await bcrypt.genSalt(8);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const resetPasswordQuery = `UPDATE users SET password='${hashedPassword}' WHERE email='${email}';`;
-    await db.query(resetPasswordQuery);
+    const resetPasswordQuery = "UPDATE users SET password=$1 WHERE email=$2;";
+    await db.query(resetPasswordQuery, [hashedPassword, email]);
 
-    const deleteResetTokensEntryQuery = `DELETE FROM resettokens WHERE email='${email}';`;
-    await db.query(deleteResetTokensEntryQuery);
+    const deleteResetTokensEntryQuery =
+      "DELETE FROM resettokens WHERE email=$1;";
+    await db.query(deleteResetTokensEntryQuery, [email]);
 
     db.release();
     return res.status(200).json({ message: "PASSWORD_RESET" });

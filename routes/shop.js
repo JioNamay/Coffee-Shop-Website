@@ -254,8 +254,9 @@ router.post("/cart", async (req, res) => {
 
     // Insert into database
     const db = await pool.connect();
-    const insertCartQuery = `INSERT INTO cart (cartItemId, buyer, item) VALUES ('${cartItemId}', '${userId}', '${itemId}');`;
-    await db.query(insertCartQuery);
+    const insertCartQuery =
+      "INSERT INTO cart (cartItemId, buyer, item) VALUES ($1, $2, $3);";
+    await db.query(insertCartQuery, [cartItemId, userId, itemId]);
     db.release();
 
     return res.status(201);

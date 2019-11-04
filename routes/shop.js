@@ -334,8 +334,9 @@ router.get("/orders", async (req, res) => {
 
     // Get order history
     const db = await pool.connect();
-    const orderHistoryQuery = `SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders INNER JOIN users ON orders.buyer=users.userid INNER JOIN items ON item=items.itemId WHERE buyer='${userId}' AND archived='f';`;
-    const orderHistory = await db.query(orderHistoryQuery);
+    const orderHistoryQuery =
+      "SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders INNER JOIN users ON orders.buyer=users.userid INNER JOIN items ON item=items.itemId WHERE buyer=$1 AND archived='f';";
+    const orderHistory = await db.query(orderHistoryQuery, [userId]);
     const orderHistoryResults = orderHistory ? orderHistory.rows : null;
 
     db.release();

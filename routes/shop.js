@@ -48,7 +48,7 @@ router.get("/items/:id", async (req, res) => {
         .json({ errors: "The product with the given ID was not found." });
 
     // retrieve the product from the database
-    const retrieveQuery = `SELECT * FROM items WHERE itemId = '$1'`;
+    const retrieveQuery = `SELECT * FROM items WHERE itemId = $1`;
     const retrieveResult = await db.query(retrieveQuery, [productId]);
     db.release();
     res.status(200).json({ items: retrieveResult.rows[0] }); // send the product

@@ -18,7 +18,7 @@ const pool = new Pool({
 router.get("/items", async (req, res) => {
   try {
     const db = await pool.connect();
-    const allItemsQuery = `SELECT * FROM items;`;
+    const allItemsQuery = "SELECT * FROM items;";
     const allItems = await db.query(allItemsQuery);
 
     const result = allItems ? allItems.rows : null;
@@ -37,7 +37,8 @@ router.get("/items/:id", async (req, res) => {
 
     // check that the product exists
     const db = await pool.connect();
-    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)`;
+    const existsQuery =
+      "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
     const existsResult = await db.query(existsQuery, [productId]);
 
     // if the product does not exist, send an error
@@ -184,8 +185,9 @@ router.delete("/items/:id", async (req, res) => {
 
     // check that the product exists
     const db = await pool.connect();
-    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
-    const existsResult = await db.query(existsQuery);
+    const existsQuery =
+      "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+    const existsResult = await db.query(existsQuery, [productId]);
 
     // if the product does not exist, send an error
     const productExists = existsResult.rows[0].exists;
@@ -195,13 +197,13 @@ router.delete("/items/:id", async (req, res) => {
         .json({ errors: "The product with the given ID was not found." });
 
     // product exists; get it so that we can send it as a response
-    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
-    const retrieveResult = await db.query(retrieveQuery);
+    const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
+    const retrieveResult = await db.query(retrieveQuery, [productId]);
     const product = retrieveResult.rows[0];
 
     // delete the product from the database
-    const deleteQuery = `DELETE FROM items WHERE itemId = '${productId}'`;
-    const deleteResult = await db.query(deleteQuery);
+    const deleteQuery = "DELETE FROM items WHERE itemId = $1";
+    const deleteResult = await db.query(deleteQuery, [productId]);
     db.release();
 
     res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response

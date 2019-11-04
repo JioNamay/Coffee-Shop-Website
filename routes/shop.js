@@ -229,8 +229,9 @@ router.get("/cart", async (req, res) => {
     const userId = await verifyToken(token);
 
     const db = await pool.connect();
-    const cartQuery = `SELECT cartitemid, itemid, name, description, price, image FROM cart INNER JOIN users ON cart.buyer=users.userid INNER JOIN items ON item=items.itemid WHERE buyer='${userId}';`;
-    const cart = await db.query(cartQuery);
+    const cartQuery =
+      "SELECT cartitemid, itemid, name, description, price, image FROM cart INNER JOIN users ON cart.buyer=users.userid INNER JOIN items ON item=items.itemid WHERE buyer=$1;";
+    const cart = await db.query(cartQuery, [userId]);
     const cartResults = cart ? cart.rows : null;
 
     db.release();

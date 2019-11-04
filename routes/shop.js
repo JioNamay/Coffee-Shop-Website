@@ -110,8 +110,9 @@ router.put("/items/:id", async (req, res) => {
 
     // check that the product exists
     const db = await pool.connect();
-    const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${productId}')`;
-    const existsResult = await db.query(existsQuery);
+    const existsQuery =
+      "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+    const existsResult = await db.query(existsQuery, [productId]);
 
     // if the product does not exist, send an error
     const productExists = existsResult.rows[0].exists;
@@ -121,8 +122,8 @@ router.put("/items/:id", async (req, res) => {
         .json({ errors: "The product with the given ID was not found." });
 
     // product exists; get it so that we can validate against it and send it as a response
-    const retrieveQuery = `SELECT * FROM items WHERE itemId = '${productId}'`;
-    const retrieveResult = await db.query(retrieveQuery);
+    const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
+    const retrieveResult = await db.query(retrieveQuery, [productId]);
     let product = retrieveResult.rows[0];
 
     const validationResult = validatePutProduct(product, req.body);
@@ -137,8 +138,9 @@ router.put("/items/:id", async (req, res) => {
       // if they want to change the itemId of the existing item to something else
       if (req.body.itemId != productId) {
         // check if itemId they want to use is already in use
-        const existsQuery = `SELECT EXISTS(SELECT itemId FROM items WHERE itemId = '${req.body.itemId}')`;
-        const existsResult = await db.query(existsQuery);
+        const existsQuery =
+          "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+        const existsResult = await db.query(existsQuery, [req.body.itemId]);
 
         // if the itemId is already in use, send an error
         const productExists = existsResult.rows[0].exists;
@@ -151,8 +153,16 @@ router.put("/items/:id", async (req, res) => {
     }
 
     // update the product in the database
-    const updateQuery = `UPDATE items SET itemId = '${value.itemId}', name = '${value.name}', description = '${value.description}', price = ${value.price}, image = '${value.image}' WHERE itemId = '${productId}'`;
-    const updateResult = await db.query(updateQuery);
+    const updateQuery =
+      "UPDATE items SET itemId = $1, name = $2, description = $3, price = $4, image = $5 WHERE itemId = $6";
+    const updateResult = await db.query(updateQuery, [
+      value.itemId,
+      value.name,
+      value.description,
+      value.price,
+      value.image,
+      productId
+    ]);
 
     product.itemId = value.itemId;
     product.name = value.name;

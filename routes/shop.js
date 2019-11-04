@@ -85,7 +85,7 @@ router.post("/items", async (req, res) => {
 
     const insertQuery =
       "INSERT INTO items (itemId, name, description, price, image) VALUES ($1, $2, $3, $4, $5);";
-    const insertResult = await db.query(insertQuery, [
+    await db.query(insertQuery, [
       value.itemId,
       value.name,
       value.description,
@@ -156,7 +156,7 @@ router.put("/items/:id", async (req, res) => {
     // update the product in the database
     const updateQuery =
       "UPDATE items SET itemId = $1, name = $2, description = $3, price = $4, image = $5 WHERE itemId = $6";
-    const updateResult = await db.query(updateQuery, [
+    await db.query(updateQuery, [
       value.itemId,
       value.name,
       value.description,
@@ -203,7 +203,7 @@ router.delete("/items/:id", async (req, res) => {
 
     // delete the product from the database
     const deleteQuery = "DELETE FROM items WHERE itemId = $1";
-    const deleteResult = await db.query(deleteQuery, [productId]);
+    await db.query(deleteQuery, [productId]);
     db.release();
 
     res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response

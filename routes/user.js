@@ -170,8 +170,8 @@ router.post("/identify", async (req, res) => {
 
     // Check if email actually exists
     const db = await pool.connect();
-    const emailExistsQuery = `SELECT * FROM users WHERE email='${email}';`;
-    const emailExists = await db.query(emailExistsQuery);
+    const emailExistsQuery = "SELECT * FROM users WHERE email=$1;";
+    const emailExists = await db.query(emailExistsQuery, [email]);
     const existsResult = emailExists ? emailExists.rows : null;
     if (existsResult.length === 0) {
       return;
@@ -209,18 +209,20 @@ router.post("/identify", async (req, res) => {
         transporter.sendMail(mailOptions);
 
         // Check if user already has done a reset. If they did, edit their token
-        const checkResetQuery = `SELECT * FROM resettokens WHERE email='${email}';`;
-        db.query(checkResetQuery).then(checkResetResult => {
+        const checkResetQuery = "SELECT * FROM resettokens WHERE email=$1;";
+        db.query(checkResetQuery, [email]).then(checkResetResult => {
           const hasEntry = checkResetResult.rows.length !== 0;
           if (hasEntry) {
             // Edit the token to the newest one, making all others invalid
-            const editResetQuery = `UPDATE resettokens SET token='${token}' WHERE email='${email}'`;
-            db.query(editResetQuery);
+            const editResetQuery =
+              "UPDATE resettokens SET token=$1 WHERE email=$2";
+            db.query(editResetQuery, [token, email]);
           } else {
             // Add an entry for reset
             const userId = existsResult[0].userid;
-            const insertResetQuery = `INSERT INTO resettokens (userId, email, token) VALUES ('${userId}', '${email}', '${token}');`;
-            db.query(insertResetQuery);
+            const insertResetQuery =
+              "INSERT INTO resettokens (userId, email, token) VALUES ($1, $2, $3);";
+            db.query(insertResetQuery, [userId, email, token]);
           }
         });
         return token;

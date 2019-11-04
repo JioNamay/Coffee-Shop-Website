@@ -98,8 +98,8 @@ router.post(
 
       // Check for valid email
       const db = await pool.connect();
-      const validEmailQuery = `SELECT * FROM users WHERE email='${email}';`;
-      const validEmail = await db.query(validEmailQuery);
+      const validEmailQuery = "SELECT * FROM users WHERE email=$1;";
+      const validEmail = await db.query(validEmailQuery, [email]);
       const result = validEmail ? validEmail.rows : null;
       if (result.length === 0) {
         return res.status(400).send({ errors: "INVALID_LOGIN" });

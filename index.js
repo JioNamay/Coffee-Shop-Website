@@ -10,6 +10,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api/user', require('./routes/user'));
 app.use('/api/shop', require('./routes/shop'));
+app.use('/api/admin', require('./routes/admin'));
 
 /*
 app.get('*', (req, res) => {

@@ -8,6 +8,14 @@ CREATE TABLE users
     PRIMARY KEY (userId)
 );
 
+CREATE TABLE administrators
+(
+    adminID UUID NOT NULL,
+    username VARCHAR(256) NOT NULL,
+    password VARCHAR(128) NOT NULL,
+    PRIMARY KEY (adminID)
+);
+
 CREATE TABLE items
 (
     itemId VARCHAR(256) NOT NULL,

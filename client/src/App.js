@@ -22,11 +22,15 @@ import VerifyReset from "./pages/VerifyReset";
 import OrderHistory from "./pages/OrderHistory";
 import {ToastContainer, toast} from "react-toastify";
 import Identify from "./pages/Identify";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminPage from "./pages/AdminPage";
+import adminReducer from "./store/reducers/adminReducer";
 
 const App = () => {
   const rootReducer = combineReducers({
     user: userReducer,
-    shop: shopReducer
+    shop: shopReducer,
+    admin: adminReducer
   });
 
   const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
@@ -48,6 +52,8 @@ const App = () => {
             <Route exact path="/history" component={OrderHistory} />
             <Route exact path="/login/identify" component={Identify} />
             <Route exact path="/login/verifyreset/:token" component={VerifyReset} />
+            <Route exact path="/admin/login" component={AdminLoginPage}/>
+            <Route exact path="/admin" component={AdminPage}/>
           </Switch>
         </Fragment>
       </Router>

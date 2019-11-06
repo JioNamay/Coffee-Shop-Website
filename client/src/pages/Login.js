@@ -101,20 +101,11 @@ const Login = (props) => {
     }
   };
 
-  const onGoogleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      //googleLoginAction();
-    } catch (error) {
-
-    }
-  };
-
   return (
     <div className="container">
       <div className="login-page">
         <h1 className="login-header">Login</h1>
-        <a className="google-btn" href="/api/user/google">Log In With Google</a>
+        <a className="google-login-button" href="/api/user/google"><p>Log In With Google</p></a>
         {
           loginError.showError &&
           <div className="alert alert-danger" role="alert">

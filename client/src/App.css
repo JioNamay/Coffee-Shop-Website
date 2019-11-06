@@ -39,6 +39,9 @@
     top: 50%;
 }
 
+/**
+CSS for Signup and Login
+ */
 .signup-link-container {
     text-align: center;
     margin-top: 5vh;
@@ -84,6 +87,23 @@
     color: red;
 }
 
+.google-login-button {
+    text-align: center;
+    text-decoration: none;
+}
+
+.google-login-button p {
+    background-color: #0089EE;
+    border: thin solid #0089EE;
+    width: 35%;
+    color: #FFFFFF;
+    padding: 0.75rem;
+    border-radius: 1px;
+    margin: 0 auto 3vh;
+    box-shadow: 1px 1px 1px grey;
+    text-decoration: none;
+}
+
 /*
 CSS for Reset Password Section
  */
@@ -92,6 +112,9 @@ CSS for Reset Password Section
     max-width: 50%;
 }
 
+/*
+CSS for Browse
+ */
 .browse-page {
     text-align: center;
     padding: 0 3rem;

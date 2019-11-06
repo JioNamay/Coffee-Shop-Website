@@ -3,6 +3,8 @@ const { Pool } = require("pg");
 const jwt = require("jsonwebtoken");
 const Joi = require("@hapi/joi"); // Joi validation tool
 
+const { adminAuth } = require("../util/adminUtils");
+
 const router = express.Router();
 
 const secrets =
@@ -24,7 +26,7 @@ router.get("/items", async (req, res) => {
     const result = allItems ? allItems.rows : null;
 
     db.release();
-    res.set('Cache-Control', 'public, max-age=31000000');
+    res.set("Cache-Control", "public, max-age=31000000");
     return res.status(200).json({ items: result });
   } catch (error) {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
@@ -62,44 +64,47 @@ router.get("/items/:id", async (req, res) => {
 // POST a product
 router.post("/items", async (req, res) => {
   try {
-    const result = validatePostProduct(req.body);
-    const { value } = result;
-    const { error } = result;
-    // if there was an error with the validation, send an error
-    if (error)
-      return res.status(400).json({ errors: error.details[0].message });
+    if (await adminAuth(req.headers["authorization"])) {
+      const result = validatePostProduct(req.body);
+      const { value } = result;
+      const { error } = result;
+      // if there was an error with the validation, send an error
+      if (error)
+        return res.status(400).json({ errors: error.details[0].message });
 
-    const db = await pool.connect();
+      const db = await pool.connect();
 
-    // check if an item with that itemId already exists
-    const existsQuery =
-      "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
-    const existsResult = await db.query(existsQuery, [value.itemId]);
+      // check if an item with that itemId already exists
+      const existsQuery =
+        "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+      const existsResult = await db.query(existsQuery, [value.itemId]);
 
-    // if the itemId is already in use, send an error
-    const productExists = existsResult.rows[0].exists;
-    if (productExists)
-      return res.status(409).json({
-        errors:
-          "There is already an item with that itemId. itemId must be unique."
-      });
+      // if the itemId is already in use, send an error
+      const productExists = existsResult.rows[0].exists;
+      if (productExists)
+        return res.status(409).json({
+          errors:
+            "There is already an item with that itemId. itemId must be unique."
+        });
 
-    const insertQuery =
-      "INSERT INTO items (itemId, name, description, price, image) VALUES ($1, $2, $3, $4, $5);";
-    await db.query(insertQuery, [
-      value.itemId,
-      value.name,
-      value.description,
-      value.price,
-      value.image
-    ]);
+      const insertQuery =
+        "INSERT INTO items (itemId, name, description, price, image) VALUES ($1, $2, $3, $4, $5);";
+      await db.query(insertQuery, [
+        value.itemId,
+        value.name,
+        value.description,
+        value.price,
+        value.image
+      ]);
 
-    // retrieve the newly added product
-    const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
-    const retrieveResult = await db.query(retrieveQuery, [value.itemId]);
-    db.release();
+      // retrieve the newly added product
+      const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
+      const retrieveResult = await db.query(retrieveQuery, [value.itemId]);
+      db.release();
 
-    res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
+      res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
+    }
+    return res.status(403).json({ errors: "FORBIDDEN" });
   } catch (error) {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
   }

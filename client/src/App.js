@@ -25,6 +25,7 @@ import Identify from "./pages/Identify";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminPage from "./pages/AdminPage";
 import adminReducer from "./store/reducers/adminReducer";
+import LoginRedirectPage from "./pages/LoginRedirectPage";
 
 const App = () => {
   const rootReducer = combineReducers({
@@ -52,8 +53,9 @@ const App = () => {
             <Route exact path="/history" component={OrderHistory} />
             <Route exact path="/login/identify" component={Identify} />
             <Route exact path="/login/verifyreset/:token" component={VerifyReset} />
-            <Route exact path="/admin/login" component={AdminLoginPage}/>
-            <Route exact path="/admin" component={AdminPage}/>
+            <Route exact path="/login/redirect/:token" component={LoginRedirectPage} />
+            <Route exact path="/admin/login" component={AdminLoginPage} />
+            <Route exact path="/admin" component={AdminPage} />
           </Switch>
         </Fragment>
       </Router>

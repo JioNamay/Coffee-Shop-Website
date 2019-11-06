@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import * as EmailValidator from 'email-validator';
 
-import { loginAction } from "../store/actions/userActions";
+import { loginAction} from "../store/actions/userActions";
 import { tokenLoginAction } from "../store/actions/userActions";
 import {Link} from "react-router-dom";
 
@@ -11,6 +11,7 @@ const Login = (props) => {
     user,
     loginAction,
     tokenLoginAction,
+    googleLoginAction
   } = props;
 
   useEffect(() => {
@@ -100,17 +101,27 @@ const Login = (props) => {
     }
   };
 
+  const onGoogleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      //googleLoginAction();
+    } catch (error) {
+
+    }
+  };
+
   return (
     <div className="container">
       <div className="login-page">
         <h1 className="login-header">Login</h1>
+        <a className="google-btn" href="/api/user/google">Log In With Google</a>
         {
           loginError.showError &&
           <div className="alert alert-danger" role="alert">
             {loginError.errorMessage}
           </div>
         }
-        <form onSubmit={(e) => {onLogin(e)}}>
+        <form onSubmit={(e) => { onLogin(e) }}>
           <div className="form-group">
             <label>Email address</label>
             <input
@@ -119,8 +130,8 @@ const Login = (props) => {
               name="email"
               required
               value={loginInfo.email}
-              onChange={e => {setEmail(e)}}
-              onBlur={e => {onBlur(e)}}
+              onChange={e => { setEmail(e) }}
+              onBlur={e => { onBlur(e) }}
             />
             {
               loginInfo.emailTouched && !loginInfo.emailValid &&
@@ -135,8 +146,8 @@ const Login = (props) => {
               name="password"
               required
               value={loginInfo.password}
-              onChange={e => {setPassword(e)}}
-              onBlur={e => {onBlur(e)}}
+              onChange={e => { setPassword(e) }}
+              onBlur={e => { onBlur(e) }}
             />
             {
               loginInfo.passwordTouched && !loginInfo.passwordValid &&

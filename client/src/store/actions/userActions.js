@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 export const LOGIN = 'LOGIN';
+export const GOOGLE_LOGIN = 'GOOGLE_LOGIN';
 export const SIGNUP = 'SIGNUP';
 export const LOGOUT = 'LOGOUT';
 export const TOKEN_LOGIN = 'TOKEN_LOGIN';
@@ -65,6 +66,8 @@ export const loginAction = (email, password) => {
 export const tokenLoginAction = (token) => {
   return async dispatch => {
     try {
+      console.log('HERE');
+      console.log(token);
       const body = JSON.stringify({token});
       const tokenLoginRequest = await axios.post('/api/user/tokenlogin', body, config);
 

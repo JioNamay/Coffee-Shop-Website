@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const uuid = require("uuid");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20');
 
 const router = express.Router();
 
@@ -16,11 +18,62 @@ const emailRecovery = process.env.EMAIL_RECOVERY || secrets.emailRecovery;
 const passwordRecovery =
   process.env.PASSWORD_RECOVERY || secrets.passwordRecovery;
 const resetUrl = process.env.WEBSITE_URL || secrets.resetUrl;
+const clientID = process.env.CLIENT_ID || secrets.clientId;
+const clientSecret = process.env.CLIENT_SECRET || secrets.clientSecret;
 
 const pool = new Pool({
   connectionString: databaseConnectionString,
   ssl: false
 });
+
+passport.use(
+  new GoogleStrategy({
+    clientID: clientID,
+    clientSecret: clientSecret,
+    callbackURL: '/user/google/redirect'
+  }, async (req, accessToken, refreshToken, profile, done) => {
+    const userFirstName = profile.name.givenName;
+    const userLastName = profile.name.familyName;
+    const email = profile.emails[0].value;
+
+    // Check if user exists
+    const db = await pool.connect();
+    const checkForUserQuery = `SELECT * FROM users WHERE email=$1;`;
+    const checkForUser = await db.query(checkForUserQuery, [email]);
+    const checkForUserResult = checkForUser.rows;
+
+    if (checkForUserResult.length === 0) {
+      // User does not exist, create an account for them
+      const userId = uuid.v4();
+
+      // No sanitization needed, this data comes from OAuth
+      const createUserQuery = `INSERT INTO users (userId, email, firstName, lastName, password) VALUES ('${userId}', '${email}', '${userFirstName}', '${userLastName}', 'passwordlol');`;
+      await db.query(createUserQuery);
+
+      const user = {
+        userData: {
+          userId: userId,
+          firstName: userFirstName,
+          lastName: userLastName,
+          email: email
+        }
+      };
+      done(null, user);
+    } else {
+      // User does exist, give them a JWT
+      const user = {
+        userData: {
+          userId: checkForUserResult[0].userid,
+          firstName: checkForUserResult[0].firstname,
+          lastName: checkForUserResult[0].lastname,
+          email: checkForUserResult[0].email
+        }
+      };
+      done(null, user);
+    }
+    db.release();
+  })
+);
 
 router.post(
   "/signup",
@@ -143,10 +196,53 @@ router.post(
   }
 );
 
+/**
+ * OAuth Authentication
+ */
+router.get('/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })
+);
+
+router.get(
+  '/google/redirect',
+  passport.authenticate('google', { session: false }),
+  async (req, res) => {
+    try {
+      const {
+        userId,
+        firstName,
+        lastName,
+        email
+      } = req.user.userData;
+
+      jwt.sign(
+        {
+          userData: {
+            userId,
+            firstName,
+            lastName,
+            email
+          }
+        },
+        tokenKey,
+        {
+          expiresIn: "5h"
+        },
+        (error, token) => {
+          res.redirect(`/login/redirect/${token}`);
+        }
+      );
+    } catch (error) {
+      return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+    }
+  }
+);
+
 router.post("/tokenlogin", async (req, res) => {
   try {
     const { token } = req.body;
-
     jwt.verify(token, tokenKey, (error, tokenData) => {
       if (error) {
         return res.status(403).json({ errors: "INVALID_TOKEN" });

@@ -24,6 +24,7 @@ router.get("/items", async (req, res) => {
     const result = allItems ? allItems.rows : null;
 
     db.release();
+    res.set('Cache-Control', 'public, max-age=31000000');
     return res.status(200).json({ items: result });
   } catch (error) {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });

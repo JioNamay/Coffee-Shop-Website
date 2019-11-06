@@ -16,7 +16,7 @@ const pool = new Pool({
 const adminAuth = async id => {
   const db = await pool.connect();
   const checkExistsQuery =
-    "SELECT EXISTS(SELECT adminID FROM administrators WHERE adminID=$1;";
+    "SELECT EXISTS(SELECT adminID FROM administrators WHERE adminID=$1);";
   const checkExists = await db.query(checkExistsQuery, [id]);
   const valid = checkExists.rows[0].exists;
   db.release();

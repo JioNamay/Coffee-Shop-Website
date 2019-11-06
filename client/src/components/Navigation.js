@@ -62,7 +62,7 @@ const Navigation = (props) => {
             {
               user &&
               <li className="nav-item active">
-                <Link to="/signup" className="nav-link">
+                <Link to="/logout" className="nav-link">
                   Log Out
                 </Link>
               </li>

@@ -1,4 +1,4 @@
-import {LOGIN, LOGOUT, SIGNUP, TOKEN_LOGIN} from "../actions/userActions";
+import {LOGIN, LOGOUT_USER, SIGNUP, TOKEN_LOGIN} from "../actions/userActions";
 import { User } from "../../models/User";
 
 /**
@@ -39,7 +39,7 @@ const userReducer = (state = initialState, action) => {
         ...state,
         user: tokenUser
       };
-    case LOGOUT:
+    case LOGOUT_USER:
       return {
         ...state,
         user: null

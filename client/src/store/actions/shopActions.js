@@ -8,6 +8,7 @@ export const GET_ITEMS = "GET_ITEMS";
 export const GET_CART = "GET_CART";
 export const ADD_CART_ITEM = "ADD_CART_ITEM";
 export const REMOVE_CART_ITEM = "REMOVE_CART_ITEM";
+export const LOGOUT_SHOP = "LOGOUT_SHOP";
 
 export const ADD_ORDER = "ADD_ORDER";
 export const GET_ORDER_HISTORY = "GET_ORDERS";
@@ -197,4 +198,16 @@ export const getOrderHistoryAction = () => {
 
 export const removeOrderHistoryAction = orderItemId => {
   return async dispatch => {};
+};
+
+export const shopLogoutAction = () => {
+  return async dispatch => {
+    try {
+      dispatch({
+        type: LOGOUT_SHOP
+      })
+    } catch (error) {
+
+    }
+  }
 };

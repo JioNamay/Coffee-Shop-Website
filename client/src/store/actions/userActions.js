@@ -3,7 +3,7 @@ import axios from 'axios'
 export const LOGIN = 'LOGIN';
 export const GOOGLE_LOGIN = 'GOOGLE_LOGIN';
 export const SIGNUP = 'SIGNUP';
-export const LOGOUT = 'LOGOUT';
+export const LOGOUT_USER = 'LOGOUT_USER';
 export const TOKEN_LOGIN = 'TOKEN_LOGIN';
 export const RESET_EMAIL = 'RESET_EMAIL';
 export const DO_RESET_PASSWORD = 'DO_RESET_PASSWORD';
@@ -66,8 +66,6 @@ export const loginAction = (email, password) => {
 export const tokenLoginAction = (token) => {
   return async dispatch => {
     try {
-      console.log('HERE');
-      console.log(token);
       const body = JSON.stringify({token});
       const tokenLoginRequest = await axios.post('/api/user/tokenlogin', body, config);
 
@@ -78,6 +76,18 @@ export const tokenLoginAction = (token) => {
       });
     } catch (error) {
       throw new Error();
+    }
+  }
+};
+
+export const userLogoutAction = () => {
+  return async dispatch => {
+    try {
+      dispatch({
+        type: LOGOUT_USER
+      })
+    } catch (error) {
+
     }
   }
 };
@@ -111,3 +121,4 @@ export const doResetAction = (token, password) => {
     }
   }
 };
+

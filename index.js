@@ -11,6 +11,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// OAuth Enabling SSL
+if (process.env.NODE_ENV === 'production') {
+  app.all('*', function addSSL(req, res, next) {
+    if (req.headers["x-forwarded-proto"] === "https" || req.url.indexOf("auth/google") !== -1) {
+      return next();
+    } else {
+      res.redirect('https://' + req.hostname + req.url);
+    }
+  });
+}
+
 app.use('/api/user', require('./routes/user'));
 app.use('/api/shop', require('./routes/shop'));
 app.use('/api/admin', require('./routes/admin'));

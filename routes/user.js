@@ -20,6 +20,7 @@ const passwordRecovery =
 const resetUrl = process.env.WEBSITE_URL || secrets.resetUrl;
 const clientID = process.env.CLIENT_ID || secrets.clientId;
 const clientSecret = process.env.CLIENT_SECRET || secrets.clientSecret;
+const absoluteURI = process.env.OAUTH_URL || 'http://localhost:3000';
 
 const pool = new Pool({
   connectionString: databaseConnectionString,
@@ -30,7 +31,8 @@ passport.use(
   new GoogleStrategy({
     clientID: clientID,
     clientSecret: clientSecret,
-    callbackURL: '/user/google/redirect'
+    callbackURL: absoluteURI + '/api/user/google/redirect',
+    proxy: true
   }, async (req, accessToken, refreshToken, profile, done) => {
     const userFirstName = profile.name.givenName;
     const userLastName = profile.name.familyName;

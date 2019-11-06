@@ -26,6 +26,7 @@ import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminPage from "./pages/AdminPage";
 import adminReducer from "./store/reducers/adminReducer";
 import LoginRedirectPage from "./pages/LoginRedirectPage";
+import Logout from "./pages/Logout";
 
 const App = () => {
   const rootReducer = combineReducers({
@@ -54,6 +55,7 @@ const App = () => {
             <Route exact path="/login/identify" component={Identify} />
             <Route exact path="/login/verifyreset/:token" component={VerifyReset} />
             <Route exact path="/login/redirect/:token" component={LoginRedirectPage} />
+            <Route exact path="/logout" component={Logout} />
             <Route exact path="/admin/login" component={AdminLoginPage} />
             <Route exact path="/admin" component={AdminPage} />
           </Switch>

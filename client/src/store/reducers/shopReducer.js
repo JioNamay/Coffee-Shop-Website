@@ -3,7 +3,7 @@ import {
   ADD_ORDER,
   GET_CART,
   GET_ITEMS,
-  GET_ORDER_HISTORY,
+  GET_ORDER_HISTORY, LOGOUT_SHOP,
   REMOVE_CART_ITEM
 } from "../actions/shopActions";
 import {Item} from "../../models/Item";
@@ -89,6 +89,13 @@ const shopReducer = (state = initialState, action) => {
       return {
         ...state,
         orderHistory: orderHistoryItems
+      };
+    case LOGOUT_SHOP:
+      return {
+        ...state,
+        items: null,
+        cart: [],
+        orderHistory: []
       };
     default:
       return state;

@@ -40,11 +40,6 @@ router.post(
       const {username, password} = req.body;
 
       const salt = await bcrypt.genSalt(8);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      console.log(hashedPassword);
-
-      console.log(username);
-      console.log(password);
 
       // Check for valid email
       const db = await pool.connect();
@@ -76,7 +71,6 @@ router.post(
 
 // Checks that an admin exists with username and password "admin"
 router.post("/setup", async (req, res) => {
-  console.log("here");
   try {
     const {username, password} = {username: "admin", password: "admin"};
 

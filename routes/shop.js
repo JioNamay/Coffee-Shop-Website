@@ -63,7 +63,7 @@ router.get("/items/:id", async (req, res) => {
 
 // POST a product
 router.post("/items", async (req, res) => {
-  if (await adminAuth(req.headers["Auth"])) {
+  if (await adminAuth(req.headers["auth"])) {
     try {
       const result = validatePostProduct(req.body);
       const { value } = result;
@@ -113,7 +113,7 @@ router.post("/items", async (req, res) => {
 
 // PUT (update) a specific product
 router.put("/items/:id", async (req, res) => {
-  if (await adminAuth(req.headers["Auth"])) {
+  if (await adminAuth(req.headers["auth"])) {
     try {
       const productId = req.params.id;
 
@@ -191,7 +191,7 @@ router.put("/items/:id", async (req, res) => {
 
 // DELETE a specific product
 router.delete("/items/:id", async (req, res) => {
-  if (await adminAuth(req.headers["Auth"])) {
+  if (await adminAuth(req.headers["auth"])) {
     try {
       const productId = req.params.id;
 

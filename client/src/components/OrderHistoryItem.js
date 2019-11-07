@@ -10,7 +10,9 @@ const OrderHistoryItem = (props) => {
     itemPrice,
     itemImage,
     dateOrdered,
-    removeOrderHistoryAction
+    removeOrderHistoryAction,
+    showImage,
+    showDelete
   } = props;
 
   const onRemoveOrder = (orderItemId) => {
@@ -19,9 +21,12 @@ const OrderHistoryItem = (props) => {
 
   return (
     <div className="order-history-card">
-      <div className="order-history-image">
-        <img src={itemImage} alt={itemName} />
-      </div>
+      {
+        showImage &&
+        <div className="order-history-image">
+          <img src={itemImage} alt={itemName} />
+        </div>
+      }
       <div className="order-history-name">
         <p>{itemName}</p>
       </div>

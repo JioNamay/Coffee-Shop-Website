@@ -42,6 +42,8 @@ const OrderHistory = (props) => {
                   itemPrice={orderItem.price}
                   itemImage={orderItem.image}
                   dateOrdered={orderItem.date}
+                  showImage={true}
+                  showDelete={false}
                 />
               )
             }

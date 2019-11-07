@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import {Link} from "react-router-dom";
 
 const UserItem = (props) => {
   const {
@@ -9,7 +10,7 @@ const UserItem = (props) => {
     email
   } = props;
 
-  const goToOrders = () => {
+  const redirectToOrders = () => {
     props.history.push("/admin/orders/" + userId);
   };
 
@@ -22,7 +23,9 @@ const UserItem = (props) => {
         <p>{email}</p>
       </div>
       <div className="order-history-options">
-        <button onClick={() => {console.log('hi')}}>Order History</button>
+        <Link to={`/admin/orders/${userId}`} className="order-history-link">
+          Order History
+        </Link>
       </div>
     </div>
   )

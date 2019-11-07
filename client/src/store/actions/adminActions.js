@@ -69,7 +69,7 @@ export const getAllUsersAction = () => {
 /*
  Returns json containing the user data and all their orders
  */
-export const getOrderHistoryAction = (userId) => {
+export const getUserOrderHistoryAction = (userId) => {
     return async (dispatch, getState) => {
         // Get the admin ID
         const admin = getState().admin.admin;
@@ -85,6 +85,9 @@ export const getOrderHistoryAction = (userId) => {
           "/api/admin/user/" + userId,
           requestConfig
         );
+
+        console.log('ACTION HERE');
+        console.log(getUserOrdersRequest.data);
 
         dispatch({
             type: GET_USER_ORDER_HISTORY,

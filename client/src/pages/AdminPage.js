@@ -29,17 +29,12 @@ const AdminPage = (props) => {
   return (
     <section className="users-section">
       {
-        console.log(allUsers)
-      }
-      {
         allUsers != null && allUsers.length > 0 &&
         <div>
           <h2>All Users</h2>
           <div className="user-items">
             {
               allUsers.map(userItem => {
-                  console.log(userItem);
-
                   return <UserItem
                     key={userItem.userId}
                     userId={userItem.userId}

@@ -27,6 +27,7 @@ import AdminPage from "./pages/AdminPage";
 import adminReducer from "./store/reducers/adminReducer";
 import LoginRedirectPage from "./pages/LoginRedirectPage";
 import Logout from "./pages/Logout";
+import AdminOrderHistoryPage from "./pages/AdminOrderHistoryPage";
 
 const App = () => {
   const rootReducer = combineReducers({
@@ -58,6 +59,7 @@ const App = () => {
             <Route exact path="/logout" component={Logout} />
             <Route exact path="/admin/login" component={AdminLoginPage} />
             <Route exact path="/admin" component={AdminPage} />
+            <Route path="/admin/orders/" component={AdminOrderHistoryPage} />
           </Switch>
         </Fragment>
       </Router>

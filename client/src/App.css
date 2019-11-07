@@ -331,3 +331,35 @@ CSS for Browse
     color: white;
     border-radius: 5px;
 }
+
+/*
+CSS for Admin
+ */
+.user-items {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+}
+
+.user-card {
+    margin: 1rem auto 3rem auto;
+    max-width: 50%;
+    border: 1px solid #DDDDDD;
+    padding: 1em;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.users-section {
+    text-align: center;
+    padding: 0 3rem;
+    align-items: center;
+    margin: 3rem auto 3rem auto;
+}
+
+.users-section h2 {
+    text-align: center;
+    width: 50%;
+    padding-bottom: 1vh;
+    margin: 0 auto 1rem auto;
+}

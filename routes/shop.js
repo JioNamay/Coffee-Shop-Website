@@ -63,8 +63,8 @@ router.get("/items/:id", async (req, res) => {
 
 // POST a product
 router.post("/items", async (req, res) => {
-  try {
-    if (await adminAuth(req.headers["authorization"])) {
+  if (await adminAuth(req.headers["Auth"])) {
+    try {
       const result = validatePostProduct(req.body);
       const { value } = result;
       const { error } = result;
@@ -103,118 +103,127 @@ router.post("/items", async (req, res) => {
       db.release();
 
       res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
+    } catch (error) {
+      return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
     }
-    return res.status(403).json({ errors: "FORBIDDEN" });
-  } catch (error) {
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  } else {
+    res.status(403).json({ errors: "FORBIDDEN" });
   }
 });
 
 // PUT (update) a specific product
 router.put("/items/:id", async (req, res) => {
-  try {
-    const productId = req.params.id;
+  if (await adminAuth(req.headers["Auth"])) {
+    try {
+      const productId = req.params.id;
 
-    // check that the product exists
-    const db = await pool.connect();
-    const existsQuery =
-      "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
-    const existsResult = await db.query(existsQuery, [productId]);
+      // check that the product exists
+      const db = await pool.connect();
+      const existsQuery =
+        "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+      const existsResult = await db.query(existsQuery, [productId]);
 
-    // if the product does not exist, send an error
-    const productExists = existsResult.rows[0].exists;
-    if (!productExists)
-      return res
-        .status(404)
-        .json({ errors: "The product with the given ID was not found." });
+      // if the product does not exist, send an error
+      const productExists = existsResult.rows[0].exists;
+      if (!productExists)
+        return res
+          .status(404)
+          .json({ errors: "The product with the given ID was not found." });
 
-    // product exists; get it so that we can validate against it and send it as a response
-    const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
-    const retrieveResult = await db.query(retrieveQuery, [productId]);
-    let product = retrieveResult.rows[0];
+      // product exists; get it so that we can validate against it and send it as a response
+      const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
+      const retrieveResult = await db.query(retrieveQuery, [productId]);
+      let product = retrieveResult.rows[0];
 
-    const validationResult = validatePutProduct(product, req.body);
-    const { value } = validationResult;
-    const { error } = validationResult;
-    // if there was an error with the validation, send an error
-    if (error)
-      return res.status(400).json({ errors: error.details[0].message });
+      const validationResult = validatePutProduct(product, req.body);
+      const { value } = validationResult;
+      const { error } = validationResult;
+      // if there was an error with the validation, send an error
+      if (error)
+        return res.status(400).json({ errors: error.details[0].message });
 
-    // if itemId is defined in body JSON
-    if (req.body.hasOwnProperty("itemId")) {
-      // if they want to change the itemId of the existing item to something else
-      if (req.body.itemId != productId) {
-        // check if itemId they want to use is already in use
-        const existsQuery =
-          "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
-        const existsResult = await db.query(existsQuery, [req.body.itemId]);
+      // if itemId is defined in body JSON
+      if (req.body.hasOwnProperty("itemId")) {
+        // if they want to change the itemId of the existing item to something else
+        if (req.body.itemId != productId) {
+          // check if itemId they want to use is already in use
+          const existsQuery =
+            "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+          const existsResult = await db.query(existsQuery, [req.body.itemId]);
 
-        // if the itemId is already in use, send an error
-        const productExists = existsResult.rows[0].exists;
-        if (productExists)
-          return res.status(409).json({
-            errors:
-              "There is already an item with that itemId. itemId must be unique."
-          });
+          // if the itemId is already in use, send an error
+          const productExists = existsResult.rows[0].exists;
+          if (productExists)
+            return res.status(409).json({
+              errors:
+                "There is already an item with that itemId. itemId must be unique."
+            });
+        }
       }
+
+      // update the product in the database
+      const updateQuery =
+        "UPDATE items SET itemId = $1, name = $2, description = $3, price = $4, image = $5 WHERE itemId = $6";
+      await db.query(updateQuery, [
+        value.itemId,
+        value.name,
+        value.description,
+        value.price,
+        value.image,
+        productId
+      ]);
+
+      product.itemId = value.itemId;
+      product.name = value.name;
+      product.description = value.description;
+      product.price = value.price;
+      product.image = value.image;
+      db.release();
+
+      res.status(200).json({ items: product }); // as a best practice, send the updated product as a response
+    } catch (error) {
+      return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
     }
-
-    // update the product in the database
-    const updateQuery =
-      "UPDATE items SET itemId = $1, name = $2, description = $3, price = $4, image = $5 WHERE itemId = $6";
-    await db.query(updateQuery, [
-      value.itemId,
-      value.name,
-      value.description,
-      value.price,
-      value.image,
-      productId
-    ]);
-
-    product.itemId = value.itemId;
-    product.name = value.name;
-    product.description = value.description;
-    product.price = value.price;
-    product.image = value.image;
-    db.release();
-
-    res.status(200).json({ items: product }); // as a best practice, send the updated product as a response
-  } catch (error) {
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  } else {
+    res.status(403).json({ errors: "FORBIDDEN" });
   }
 });
 
 // DELETE a specific product
 router.delete("/items/:id", async (req, res) => {
-  try {
-    const productId = req.params.id;
+  if (await adminAuth(req.headers["Auth"])) {
+    try {
+      const productId = req.params.id;
 
-    // check that the product exists
-    const db = await pool.connect();
-    const existsQuery =
-      "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
-    const existsResult = await db.query(existsQuery, [productId]);
+      // check that the product exists
+      const db = await pool.connect();
+      const existsQuery =
+        "SELECT EXISTS(SELECT itemId FROM items WHERE itemId = $1)";
+      const existsResult = await db.query(existsQuery, [productId]);
 
-    // if the product does not exist, send an error
-    const productExists = existsResult.rows[0].exists;
-    if (!productExists)
-      return res
-        .status(404)
-        .json({ errors: "The product with the given ID was not found." });
+      // if the product does not exist, send an error
+      const productExists = existsResult.rows[0].exists;
+      if (!productExists)
+        return res
+          .status(404)
+          .json({ errors: "The product with the given ID was not found." });
 
-    // product exists; get it so that we can send it as a response
-    const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
-    const retrieveResult = await db.query(retrieveQuery, [productId]);
-    const product = retrieveResult.rows[0];
+      // product exists; get it so that we can send it as a response
+      const retrieveQuery = "SELECT * FROM items WHERE itemId = $1";
+      const retrieveResult = await db.query(retrieveQuery, [productId]);
+      const product = retrieveResult.rows[0];
 
-    // delete the product from the database
-    const deleteQuery = "DELETE FROM items WHERE itemId = $1";
-    await db.query(deleteQuery, [productId]);
-    db.release();
+      // delete the product from the database
+      const deleteQuery = "DELETE FROM items WHERE itemId = $1";
+      await db.query(deleteQuery, [productId]);
+      db.release();
 
-    res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response
-  } catch (error) {
-    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+      res.status(200).json({ items: product }); // as a best practice, send the deleted product as a response
+    } catch (error) {
+      return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+    }
+  } else {
+    res.status(403).json({ errors: "FORBIDDEN" });
   }
 });
 

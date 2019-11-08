@@ -71,7 +71,6 @@ router.post(
 
 // Checks that an admin exists with username and password "admin"
 router.post("/setup", async (req, res) => {
-
   // // user must be admin to create a new admin
   // const auth = req.headers["auth"];
   // // do the auth
@@ -132,7 +131,7 @@ router.get("/users", async (req, res) => {
 });
 
 // returns json containing all user data (except password) and all their orders
-router.get("/user/:userId", async (req, res) => {
+router.get("/users/:userId", async (req, res) => {
   const auth = req.headers["auth"];
   // do the auth
   if (!(await adminAuth(auth))) {

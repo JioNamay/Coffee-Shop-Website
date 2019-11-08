@@ -230,7 +230,7 @@ router.get(
         },
         tokenKey,
         {
-          expiresIn: "5h"
+          expiresIn: "3h"
         },
         (error, token) => {
           res.redirect(`/login/redirect/${token}`);

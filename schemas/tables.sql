@@ -56,11 +56,8 @@ CREATE TABLE resettokens
     PRIMARY KEY (userId, token)
 );
 
-SELECT * FROM orders NATURAL JOIN users INNER JOIN items ON item=items.itemId;
-
 INSERT INTO users (userId, firstName, lastName, email, password)
 VALUES ('d73a0001-3dea-4aa7-aca6-f9cdd8ec89af', 'Bob', 'Smith', 'test@gmail.com', 'password123');
-
 
 INSERT INTO items (name, description, price, image)
 VALUES ('01d5828d5995fc9d1b6175f35883a9d6', 'Espresso', 'Espresso is generally thicker than coffee brewed by other methods, has a higher concentration of suspended and dissolved solids, and has a foam with a creamy consistency', 4.35, 'https://miro.medium.com/max/1200/1*4FzJWow3qJOV_O-3iKgBOw.jpeg');

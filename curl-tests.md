@@ -10,7 +10,7 @@
 
 |                            Assumption                            |                                                    Command                                                    |                                Result on CLI                                 |
 | :--------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------: |
-|     A product with an itemId of "psl1" exists in the database     | curl -H "Content-Type: application/json" -X GET https://aroma-coffee-nwen304.herokuapp.com/api/shop/items/psl1 |                A JSON object of the product with the ID "id1"                |
+|     A product with an itemId of "psl1" exists in the database     | curl -H "Content-Type: application/json" -X GET https://aroma-coffee-nwen304.herokuapp.com/api/shop/items/psl1 |                A JSON object of the product with the ID "psl1"                |
 | A product with an itemId of "id1" DOES NOT exist in the database | curl -H "Content-Type: application/json" -X GET https://aroma-coffee-nwen304.herokuapp.com/api/shop/items/id1 | The following message:<br><br>"The product with the given ID was not found." |
 
 ## POST /api/shop/items

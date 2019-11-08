@@ -271,9 +271,12 @@ router.post("/cart", async (req, res) => {
     const insertCartQuery =
       "INSERT INTO cart (cartItemId, buyer, item) VALUES ($1, $2, $3);";
     await db.query(insertCartQuery, [cartItemId, userId, itemId]);
-    db.release();
 
-    return res.status(201);
+    const selectQuery = "SELECT * FROM cart WHERE cartItemId = $1";
+    const selectResult = await db.query(selectQuery, [cartItemId]);
+
+    db.release();
+    return res.status(201).json({ cart: selectResult.rows[0] }); // as a best practice, send the added item as a response
   } catch (error) {
     if (error.message === "INVALID_TOKEN") {
       return res.status(403).json({ errors: "INVALID_TOKEN" });
@@ -295,8 +298,11 @@ router.delete("/cart/:cart_item_id", async (req, res) => {
     const deleteCartQuery = "DELETE from cart where cartitemid=$1;";
     await db.query(deleteCartQuery, [cartItemId]);
 
+    const selectQuery = "SELECT * FROM cart WHERE cartItemId = $1";
+    const selectResult = await db.query(selectQuery, [cartItemId]);
+
     db.release();
-    return res.status(200);
+    return res.status(200).json({ cart: selectResult.rows[0] }); // as a best practice, send the deleted item as a response
   } catch (error) {
     if (error.message === "INVALID_TOKEN") {
       return res.status(403).json({ errors: "INVALID_TOKEN" });

@@ -1,7 +1,7 @@
 # cURL Test Cases
 
 ##### Please note: #####
-The list of products at https://aroma-coffee-nwen304.herokuapp.com/browse is cached for 10 minutes, so the effect of a POST/PUT/DELETE cURL test to /api/shop/ will not be immediately visible by reloading the page. To view the effect of POST/PUT/DELETE cURL test to /api/shop/ on the https://aroma-coffee-nwen304.herokuapp.com/browse page in the browser, the cache will need to expire or be manually cleared. ####
+The list of products at https://aroma-coffee-nwen304.herokuapp.com/browse is cached for 10 minutes, so the effect of a POST/PUT/DELETE cURL test to /api/shop/ will not be immediately visible by reloading the page. To view the effect of POST/PUT/DELETE cURL test to /api/shop/ on the https://aroma-coffee-nwen304.herokuapp.com/browse page in the browser, the cache will need to expire or be manually cleared.
 
 ## GET /api/shop/items
 

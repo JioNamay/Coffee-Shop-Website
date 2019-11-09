@@ -26,6 +26,9 @@ router.get("/items", async (req, res) => {
     const result = allItems ? allItems.rows : null;
 
     db.release();
+
+    res.set('Cache-Control', 'public, max-age=600');
+    res.set('Last-Modified', new Date());
     return res.status(200).json({ items: result });
   } catch (error) {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
@@ -101,6 +104,8 @@ router.post("/items", async (req, res) => {
       const retrieveResult = await db.query(retrieveQuery, [value.itemId]);
       db.release();
 
+      res.set('Cache-Control', 'public, max-age=600');
+      res.set('Last-Modified', new Date());
       res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
     } catch (error) {
       return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });

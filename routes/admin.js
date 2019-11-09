@@ -200,13 +200,42 @@ router.delete("/order/:orderId", async (req, res) => {
     }
 
     // delete product from database
-    const deleteQuery = "DELETE FROM orders WHERE orderItemId=$1";
+    const deleteQuery = "DELETE FROM orders WHERE orderItemId=$1;";
     await db.query(deleteQuery, [orderId]);
 
     db.release();
 
     // return the deleted order as json.
     return res.status(200).json({ order: existsResult });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+router.put("/order/:orderId", async (req, res) => {
+  try {
+    // Verify admin
+    const auth = req.headers["auth"];
+    if (!(await adminAuth(auth))) {
+      return res.status(401).json({ errors: "UNAUTHORIZED_ACTION" });
+    }
+
+    // Get the order ID
+    const orderId = req.params.orderId;
+
+    const db = await pool.connect();
+    const existsQuery = `SELECT * FROM orders WHERE orderItemId=$1;`;
+    const exists = await db.query(existsQuery, [orderId]);
+    const existsResult = exists ? exists.rows : null;
+    if (!existsResult.length > 0) {
+      return res.status(404).json({ errors: "ORDER_NOT_FOUND" });
+    }
+
+    const archiveQuery = "UPDATE orders SET archived=TRUE WHERE orderItemId=$1;";
+    await db.query(archiveQuery, [orderId]);
+
+    return res.status(200).json({ message: "SUCCESS" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });

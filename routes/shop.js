@@ -26,6 +26,9 @@ router.get("/items", async (req, res) => {
     const result = allItems ? allItems.rows : null;
 
     db.release();
+
+    res.set('Cache-Control', 'public, max-age=600');
+    res.set('Last-Modified', new Date());
     return res.status(200).json({ items: result });
   } catch (error) {
     return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
@@ -101,6 +104,8 @@ router.post("/items", async (req, res) => {
       const retrieveResult = await db.query(retrieveQuery, [value.itemId]);
       db.release();
 
+      res.set('Cache-Control', 'public, max-age=600');
+      res.set('Last-Modified', new Date());
       res.status(201).json({ items: retrieveResult.rows[0] }); // as a best practice, send the posted product as a response
     } catch (error) {
       return res.status(500).json({ errors: "INTERNAL_SERVER_ERROR" });
@@ -229,6 +234,7 @@ router.delete("/items/:id", async (req, res) => {
 async function verifyToken(token) {
   return await jwt.verify(token, tokenKey, (error, tokenData) => {
     if (error) {
+      console.log(error);
       throw new Error("INVALID_TOKEN");
     } else {
       return tokenData.userData.userId;
@@ -249,6 +255,7 @@ router.get("/cart", async (req, res) => {
     const cartResults = cart ? cart.rows : null;
 
     db.release();
+
     return res.status(200).json({ cart: cartResults });
   } catch (error) {
     if (error.message === "INVALID_TOKEN") {
@@ -266,7 +273,6 @@ router.post("/cart", async (req, res) => {
     const token = req.headers["authorization"];
     const userId = await verifyToken(token);
 
-    // Insert into database
     const db = await pool.connect();
     const insertCartQuery =
       "INSERT INTO cart (cartItemId, buyer, item) VALUES ($1, $2, $3);";
@@ -276,8 +282,10 @@ router.post("/cart", async (req, res) => {
     const selectResult = await db.query(selectQuery, [cartItemId]);
 
     db.release();
+
     return res.status(201).json({ cart: selectResult.rows[0] }); // as a best practice, send the added item as a response
   } catch (error) {
+    console.log(error);
     if (error.message === "INVALID_TOKEN") {
       return res.status(403).json({ errors: "INVALID_TOKEN" });
     }

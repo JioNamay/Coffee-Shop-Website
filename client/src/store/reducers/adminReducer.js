@@ -1,6 +1,6 @@
 import {LOGIN, LOGOUT, SIGNUP, TOKEN_LOGIN} from "../actions/userActions";
 import {User} from "../../models/User";
-import {ADMIN_LOGIN, GET_ALL_USERS, GET_USER_ORDER_HISTORY} from "../actions/adminActions";
+import {ADMIN_LOGIN, DELETE_ORDER, GET_ALL_USERS, GET_USER_ORDER_HISTORY} from "../actions/adminActions";
 import {ADMIN_LOGOUT} from "../actions/adminActions";
 import {Admin} from "../../models/Admin";
 import {UserInfo} from "../../models/UserInfo";
@@ -34,11 +34,15 @@ const adminReducer = (state = initialState, action) => {
         ...state,
         admin
       };
+
+
     case ADMIN_LOGOUT:
       return {
         ...state,
         admin: null
       };
+
+
     case GET_ALL_USERS:
       const userRes = action.payload.users;
       const userInfo = [];
@@ -57,8 +61,9 @@ const adminReducer = (state = initialState, action) => {
         ...state,
         userInfo: userInfo
       };
+
+
     case GET_USER_ORDER_HISTORY:
-      console.log('HEREHERE');
       const userResult = action.payload.user;
       const orderHistoryResult = action.payload.orderHistory;
       const orderHistoryItems = [];
@@ -89,6 +94,24 @@ const adminReducer = (state = initialState, action) => {
       return {
         ...state,
         orderHistory: {user: user, orderHistory: orderHistoryItems},
+      };
+
+
+    case DELETE_ORDER:
+      const orderId = action.payload.orderid;
+      const newOrderHistory = [];
+
+      // loop through the items and make a list containing all the items that we don't want to delete.
+      for (const historyItem in state.orderHistory.orderHistory) {
+        if (state.orderHistory.orderHistory.hasOwnProperty(historyItem) &&
+          state.orderHistory.orderHistory[historyItem].orderitemid !== orderId) {
+          newOrderHistory.push(state.orderHistory.orderHistory[historyItem]);
+        }
+      }
+
+      return {
+        ...state,
+        orderHistory: {user: state.admin.user, orderHistory: newOrderHistory}
       };
 
     default:

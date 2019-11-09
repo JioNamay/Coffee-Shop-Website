@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { removeOrderHistoryAction } from "../store/actions/shopActions";
+import {deleteOrderAction} from "../store/actions/adminActions";
 
 const OrderHistoryItem = (props) => {
   const {
@@ -11,12 +12,17 @@ const OrderHistoryItem = (props) => {
     itemImage,
     dateOrdered,
     removeOrderHistoryAction,
+    deleteOrderAction,
     showImage,
     showDelete
   } = props;
 
   const onRemoveOrder = (orderItemId) => {
     removeOrderHistoryAction(orderItemId);
+  };
+
+  const adminRemoveOrder = (orderItemId) => {
+    deleteOrderAction(orderItemId);
   };
 
   return (
@@ -37,11 +43,20 @@ const OrderHistoryItem = (props) => {
           <p>{dateOrdered}</p>
         </div>
       </div>
-      <div className="order-history-options">
-        <button onClick={() => {onRemoveOrder(orderItemId)}}>Remove From History</button>
-      </div>
+      {
+        showDelete &&
+        <div className="order-history-options">
+          <button onClick={() => {adminRemoveOrder(orderItemId)}}>Remove From History</button>
+        </div>
+      }
+      {
+        !showDelete &&
+        <div className="order-history-options">
+          <button onClick={() => {onRemoveOrder(orderItemId)}}>Remove From History</button>
+        </div>
+      }
     </div>
   )
 };
 
-export default connect(null, { removeOrderHistoryAction })(OrderHistoryItem);
+export default connect(null, { removeOrderHistoryAction, deleteOrderAction})(OrderHistoryItem);

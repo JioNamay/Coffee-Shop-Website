@@ -7,6 +7,7 @@ export const ADMIN_LOGOUT = "ADMIN_LOGOUT";
 export const GET_ALL_USERS = "GET_USERS";
 export const GET_USER_ORDER_HISTORY = "GET_USER_ORDER_HISTORY";
 export const DELETE_ORDER = "DELETE_ORDER";
+export const ARCHIVE_ORDER = "ARCHIVE_ORDER";
 
 const config = {
   headers: {
@@ -119,3 +120,5 @@ export const deleteOrderAction = orderId => {
     });
   };
 };
+
+// todo: archive order

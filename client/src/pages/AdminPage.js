@@ -13,7 +13,7 @@ const AdminPage = (props) => {
 
   useEffect(() => {
     if (admin === null) {
-      //props.history.push('/');
+      props.history.push("/admin/login");
     }
 
     // Get all users

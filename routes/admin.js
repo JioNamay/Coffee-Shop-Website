@@ -162,7 +162,7 @@ router.get("/users/:userId", async (req, res) => {
 
     // get the order history of the user
     const orderHistoryQuery =
-      "SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders INNER JOIN users ON orders.buyer=users.userid INNER JOIN items ON item=items.itemId WHERE buyer=$1;";
+      "SELECT orderitemid, itemid, name, description, price, image, dateordered FROM orders INNER JOIN users ON orders.buyer=users.userid INNER JOIN items ON item=items.itemId WHERE buyer=$1 AND archived='f';";
     const orderHistory = await db.query(orderHistoryQuery, [userId]);
     const orderHistoryResults = orderHistory ? orderHistory.rows : null;
 

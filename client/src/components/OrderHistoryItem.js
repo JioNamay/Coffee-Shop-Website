@@ -1,38 +1,38 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React from "react";
+import {connect} from "react-redux";
 
-import { removeOrderHistoryAction } from "../store/actions/shopActions";
+import {removeOrderHistoryAction} from "../store/actions/shopActions";
 import {deleteOrderAction} from "../store/actions/adminActions";
+import {archiveOrderHistoryAction} from "../store/actions/shopActions";
 
-const OrderHistoryItem = (props) => {
+const OrderHistoryItem = props => {
   const {
     orderItemId,
     itemName,
     itemPrice,
     itemImage,
     dateOrdered,
-    removeOrderHistoryAction,
     deleteOrderAction,
     showImage,
-    showDelete
+    showDelete,
+    showArchive
   } = props;
-
-  const onRemoveOrder = (orderItemId) => {
-    removeOrderHistoryAction(orderItemId);
-  };
 
   const adminRemoveOrder = (orderItemId) => {
     deleteOrderAction(orderItemId);
   };
 
+  const onArchiveOrder = orderItemId => {
+    archiveOrderHistoryAction(orderItemId);
+  };
+
   return (
     <div className="order-history-card">
-      {
-        showImage &&
+      {showImage && (
         <div className="order-history-image">
-          <img src={itemImage} alt={itemName} />
+          <img src={itemImage} alt={itemName}/>
         </div>
-      }
+      )}
       <div className="order-history-name">
         <p>{itemName}</p>
       </div>
@@ -46,17 +46,23 @@ const OrderHistoryItem = (props) => {
       {
         showDelete &&
         <div className="order-history-options">
-          <button onClick={() => {adminRemoveOrder(orderItemId)}}>Remove From History</button>
+          <button onClick={() => {
+            adminRemoveOrder(orderItemId)
+          }}>Remove From History
+          </button>
         </div>
       }
       {
-        !showDelete &&
+        showArchive &&
         <div className="order-history-options">
-          <button onClick={() => {onRemoveOrder(orderItemId)}}>Remove From History</button>
+          <button onClick={() => {
+            onArchiveOrder(orderItemId);
+          }}>Archive
+          </button>
         </div>
       }
     </div>
-  )
+  );
 };
 
-export default connect(null, { removeOrderHistoryAction, deleteOrderAction})(OrderHistoryItem);
+export default connect(null, {removeOrderHistoryAction, deleteOrderAction})(OrderHistoryItem);

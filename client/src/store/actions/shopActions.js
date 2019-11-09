@@ -200,14 +200,16 @@ export const removeOrderHistoryAction = orderItemId => {
   return async dispatch => {};
 };
 
+export const archiveOrderHistoryAction = orderItemId => {
+  return async dispatch => {};
+};
+
 export const shopLogoutAction = () => {
   return async dispatch => {
     try {
       dispatch({
         type: LOGOUT_SHOP
-      })
-    } catch (error) {
-
-    }
-  }
+      });
+    } catch (error) {}
+  };
 };

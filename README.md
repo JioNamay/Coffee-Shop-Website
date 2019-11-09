@@ -4,7 +4,7 @@
 
 #### How To Use The System
 
-#####Important Notes <br>
+##### Important Notes <br>
 **Caching**: <br>
 The items are cached for 10 minutes. If you do add or delete an item, refresh your cache if you want to see it
 immediately.
@@ -75,7 +75,8 @@ shows all of the user's past orders.
 There is no link to the admin page on purpose. In order to access it, go to /admin/login and then
 type in a username of "admin" and password of "admin". Once you are there, you will be redirected to the admin
 page which lists the users. You can then view their order history by clicking on "View Order History" for
-each specific user.
+each specific user. <br>
+An admin can also delete from or archive a user's order history. The "orders" table in the PostgreSQL database acts as the archive file, and the "orders" table has an "archived" column of type BOOLEAN. Each entry has "archived" set to true if it is an archived order, otherwise it is set to false. All archived orders can be retrieved from the database with the following SQL query: "SELECT * from orders WHERE archived = 't'".
 
 **Timeout Function** <br>
 Once the user has logged in they are given a set session that they can use. That session time is 

@@ -427,4 +427,15 @@ function validatePutProduct(oldProduct, newProduct) {
   return Joi.validate(newProduct, schema);
 }
 
+/**
+ * Checks that something is a valid v4 UUID.
+ * @param uuid the uuid to be checked
+ * @return {ValidationResult<any>} The joi validation result.
+ */
+function validateUUID(uuid) {
+  const schema = Joi.string().guid({ version: ["uuidv4"] });
+
+  return Joi.validate(uuid, schema);
+}
+
 module.exports = router;

@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {connect} from 'react-redux';
-import * as EmailValidator from 'email-validator';
 
 import {adminLoginAction} from "../store/actions/adminActions";
-import {Link} from "react-router-dom";
 
 const AdminLoginPage = (props) => {
   let {
@@ -101,7 +99,7 @@ const AdminLoginPage = (props) => {
           onLogin(e)
         }}>
           <div className="form-group">
-            <label>Email address</label>
+            <label>Username</label>
             <input
               type="text"
               className="form-control"

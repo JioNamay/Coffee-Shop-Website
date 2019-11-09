@@ -286,10 +286,9 @@ Response Codes: <br>
 
 #### What Error Handling Has Been Implemented
 
-**Database Sanitization** <br>
+**SQL Injection and Cross-site Scripting Vulnerability Mitigation** <br>
 
-Inputs that used to perform database operations, such as an ADD ITEM request are sanitized. This method
-is used to prevent SQL Injection.
+To mitigate the risk of SQL injection attacks, we took advantage of PostgreSQL's parameterized query support instead of using string contatenation. To mitigate the risk of cross-site scripting attacks, ReactJS was used, wherein string variables in views are automatically escaped.
 
 **Signup/Login Forms** <br>
 
@@ -306,3 +305,9 @@ or get it through some other way. If a token is invalid, they cannot continue wi
 
 This does mean that the user would need to log in again once their token expires but that's OK because this is a part
 of the timeout functionality (token expiry after session goes past given time).
+
+**POST/PUT Request Body Validation** <br>
+
+Validation of POST/PUT request bodies was conducted using the express-validator package or the @hapi/joi package. These packages were used to ensure that POST/PUT request bodies contained certain mandatory keys and that their values were of the correct type and length. Additionally, these packages ensured that keys that were not mandatory were assigned default values. If any of these requirements were not met by the request body, the appropriate status code and an error message were sent.
+
+

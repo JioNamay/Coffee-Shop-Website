@@ -4,6 +4,11 @@
 
 #### How To Use The System
 
+#####Important Notes <br>
+**Caching**: <br>
+The items are cached for 10 minutes. If you do add or delete an item, refresh your cache if you want to see it
+immediately.
+
 **Local Use**: <br>
 To use the system on a local device, go to the source folder and run "npm install" and then go to the
 client folder and run "npm install". Once the packages have been installed, set up the SQL inside
@@ -42,7 +47,6 @@ or they can use the email that they signed up with if it's available.
 NOTE: If you haven't logged out officially using "Logout" in the navigation bar, the "Login" option will automatically
 sign you in assuming you have a legitimate token in your local storage that hasn't expires yet. If the token
 is no longer valid, you have to sign in again.
-
 
 **Signup** <br>
 A user can sign up and create an account through this page.

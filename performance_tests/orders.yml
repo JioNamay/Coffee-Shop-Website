@@ -1,0 +1,12 @@
+config:
+  target: 'https://aroma-coffee-nwen304.herokuapp.com'
+  phases:
+    - duration: 10
+      arrivalRate: 20
+  defaults:
+    headers:
+      authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRGF0YSI6eyJ1c2VySWQiOiJmZDg1MzU3NC1hMDY0LTRmNGMtOWRlNy01NWQyOTVjOGRmZjIiLCJmaXJzdE5hbWUiOiJEdWFuZSIsImxhc3ROYW1lIjoiQWxjYWxhIiwiZW1haWwiOiIxQGdtYWlsLmNvbSJ9LCJpYXQiOjE1NzMyNjgzOTN9.9M-m8YEnT0GMsGxF-Ttf5su0XOgrNyaBIvEIlfPZJxQ'
+scenarios:
+  - flow:
+      - get:
+          url: "/api/shop/orders"

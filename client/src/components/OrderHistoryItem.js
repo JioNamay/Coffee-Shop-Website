@@ -1,9 +1,7 @@
 import React from "react";
 import {connect} from "react-redux";
 
-import {removeOrderHistoryAction} from "../store/actions/shopActions";
-import {deleteOrderAction} from "../store/actions/adminActions";
-import {archiveOrderHistoryAction} from "../store/actions/shopActions";
+import {archiveOrderAction, deleteOrderAction} from "../store/actions/adminActions";
 
 const OrderHistoryItem = props => {
   const {
@@ -13,17 +11,18 @@ const OrderHistoryItem = props => {
     itemImage,
     dateOrdered,
     deleteOrderAction,
+    archiveOrderAction,
     showImage,
     showDelete,
     showArchive
   } = props;
 
-  const adminRemoveOrder = (orderItemId) => {
+  const adminRemoveOrder = () => {
     deleteOrderAction(orderItemId);
   };
 
-  const onArchiveOrder = orderItemId => {
-    archiveOrderHistoryAction(orderItemId);
+  const onArchiveOrder = () => {
+    archiveOrderAction(orderItemId);
   };
 
   return (
@@ -47,7 +46,7 @@ const OrderHistoryItem = props => {
         showDelete &&
         <div className="order-history-options">
           <button onClick={() => {
-            adminRemoveOrder(orderItemId)
+            adminRemoveOrder()
           }}>Remove From History
           </button>
         </div>
@@ -56,7 +55,7 @@ const OrderHistoryItem = props => {
         showArchive &&
         <div className="order-history-options">
           <button onClick={() => {
-            onArchiveOrder(orderItemId);
+            onArchiveOrder();
           }}>Archive
           </button>
         </div>
@@ -65,4 +64,4 @@ const OrderHistoryItem = props => {
   );
 };
 
-export default connect(null, {removeOrderHistoryAction, deleteOrderAction})(OrderHistoryItem);
+export default connect(null, {deleteOrderAction, archiveOrderAction})(OrderHistoryItem);

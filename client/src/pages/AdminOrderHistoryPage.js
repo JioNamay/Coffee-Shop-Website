@@ -49,6 +49,7 @@ const AdminOrderHistoryPage = props => {
               {orderHistory.map(orderItem => (
                 <OrderHistoryItem
                   key={orderItem.orderItemId}
+                  orderItemId={orderItem.orderItemId}
                   itemId={orderItem.itemId}
                   itemName={orderItem.name}
                   itemPrice={orderItem.price}

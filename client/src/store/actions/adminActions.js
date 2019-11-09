@@ -6,8 +6,7 @@ export const ADMIN_LOGOUT = "ADMIN_LOGOUT";
 
 export const GET_ALL_USERS = "GET_USERS";
 export const GET_USER_ORDER_HISTORY = "GET_USER_ORDER_HISTORY";
-export const DELETE_ORDER = "DELETE_ORDER";
-export const ARCHIVE_ORDER = "ARCHIVE_ORDER";
+export const REMOVE_ORDER = "REMOVE_ORDER";
 
 const config = {
   headers: {
@@ -84,9 +83,6 @@ export const getUserOrderHistoryAction = userId => {
       requestConfig
     );
 
-    console.log("ACTION HERE");
-    console.log(getUserOrdersRequest.data);
-
     dispatch({
       type: GET_USER_ORDER_HISTORY,
       payload: getUserOrdersRequest.data
@@ -97,7 +93,7 @@ export const getUserOrderHistoryAction = userId => {
 /*
  Deletes the order corresponding to the provided ID
  */
-export const deleteOrderAction = orderId => {
+export const deleteOrderAction = (orderId) => {
   return async (dispatch, getState) => {
     // Get the user token
     const admin = getState().admin.admin;
@@ -114,11 +110,55 @@ export const deleteOrderAction = orderId => {
       requestConfig
     );
 
+    // remove the deleted order from the shown history
+    const filteredHistory = [...getState().admin.orderHistory.orderHistory].filter(
+      historyItem => historyItem.orderItemId !== orderId
+    );
+
     dispatch({
-      type: DELETE_ORDER,
-      payload: deleteOrderRequest.data
+      type: REMOVE_ORDER,
+      payload: {
+        user: getState().admin.orderHistory.user,
+        orderHistory: filteredHistory
+      }
     });
   };
 };
 
-// todo: archive order
+/*
+ Archives the order corresponding to the provided ID
+ */
+export const archiveOrderAction = (orderId) => {
+  return async (dispatch, getState) => {
+
+    // Get the user token
+    const admin = getState().admin.admin;
+
+    const requestConfig = {
+      headers: {
+        "Content-Type": "application/json",
+        auth: `${admin.adminId}`
+      }
+    };
+
+    // send delete request
+    const archiveOrderRequest = await axios.put(
+      "/api/admin/order/" + orderId,
+      {},
+      requestConfig
+    );
+
+    // remove the archived order from the shown history
+    const filteredHistory = [...getState().admin.orderHistory.orderHistory].filter(
+      historyItem => historyItem.orderItemId !== orderId
+    );
+
+    dispatch({
+      type: REMOVE_ORDER,
+      payload: {
+        user: getState().admin.orderHistory.user,
+        orderHistory: filteredHistory
+      }
+    });
+  };
+};

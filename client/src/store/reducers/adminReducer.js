@@ -1,6 +1,13 @@
 import {LOGIN, LOGOUT, SIGNUP, TOKEN_LOGIN} from "../actions/userActions";
 import {User} from "../../models/User";
-import {ADMIN_LOGIN, DELETE_ORDER, GET_ALL_USERS, GET_USER_ORDER_HISTORY} from "../actions/adminActions";
+import {
+  ADMIN_LOGIN,
+  ARCHIVE_ORDER,
+  DELETE_ORDER,
+  GET_ALL_USERS,
+  GET_USER_ORDER_HISTORY,
+  REMOVE_ORDER
+} from "../actions/adminActions";
 import {ADMIN_LOGOUT} from "../actions/adminActions";
 import {Admin} from "../../models/Admin";
 import {UserInfo} from "../../models/UserInfo";
@@ -97,21 +104,10 @@ const adminReducer = (state = initialState, action) => {
       };
 
 
-    case DELETE_ORDER:
-      const orderId = action.payload.orderid;
-      const newOrderHistory = [];
-
-      // loop through the items and make a list containing all the items that we don't want to delete.
-      for (const historyItem in state.orderHistory.orderHistory) {
-        if (state.orderHistory.orderHistory.hasOwnProperty(historyItem) &&
-          state.orderHistory.orderHistory[historyItem].orderitemid !== orderId) {
-          newOrderHistory.push(state.orderHistory.orderHistory[historyItem]);
-        }
-      }
-
+    case REMOVE_ORDER:
       return {
         ...state,
-        orderHistory: {user: state.admin.user, orderHistory: newOrderHistory}
+        orderHistory: {user: action.payload.user, orderHistory: action.payload.orderHistory}
       };
 
     default:

@@ -239,7 +239,7 @@ CSS for Browse
 
 .cart-items, .order-history-items  {
     margin: 0 auto 2rem auto;
-    width: 40%;
+    width: 60%;
     border: 1px solid #DDDDDD;
     border-radius: 10px;
     background-color: #FFFFFF;

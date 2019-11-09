@@ -180,7 +180,7 @@ router.post(
         },
         tokenKey,
         {
-          expiresIn: "5h"
+          expiresIn: "3h"
         },
         (error, token) => {
           return res.status(200).json({
